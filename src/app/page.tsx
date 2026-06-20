@@ -37,6 +37,7 @@ export default function Home() {
       substation: "Network Node",
       senelec225: "SENELEC 225kV",
       omvg225: "OMVG / Cross-border",
+      esiSite: "ESI Site",
     },
     FR: {
       title: "Observateur de Réseau",
@@ -58,6 +59,7 @@ export default function Home() {
       substation: "Nœud de Réseau",
       senelec225: "SENELEC 225kV",
       omvg225: "OMVG / Transfrontalier",
+      esiSite: "Site ESI",
     }
   }[lang];
 
@@ -219,6 +221,12 @@ export default function Home() {
                     <div className="w-2 h-2 rounded-full bg-[#6E7180] border border-white/20 shadow-[0_0_6px_rgba(110,113,128,0.4)]" />
                     <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.substation}</span>
                 </div>
+                <div className="flex items-center gap-3">
+                    <div style={{filter:'drop-shadow(0 0 4px rgba(245,158,11,0.6))'}}>
+                        <div className="w-3 h-3 bg-[#F59E0B]" style={{clipPath:'polygon(50% 0%,100% 50%,50% 100%,0% 50%)'}}/>
+                    </div>
+                    <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.esiSite}</span>
+                </div>
             </div>
         </div>
         {/* Mobile panel toggle buttons — bottom-left (Info) and bottom-right (Legend) */}
@@ -315,6 +323,12 @@ export default function Home() {
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-[#6E7180] border border-white/20 shadow-[0_0_6px_rgba(110,113,128,0.4)]" />
                       <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.substation}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div style={{filter:'drop-shadow(0 0 4px rgba(245,158,11,0.6))'}}>
+                        <div className="w-3 h-3 bg-[#F59E0B]" style={{clipPath:'polygon(50% 0%,100% 50%,50% 100%,0% 50%)'}}/>
+                      </div>
+                      <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.esiSite}</span>
                     </div>
                   </div>
                 </div>

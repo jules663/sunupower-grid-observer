@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { GridFilter } from "@/app/page";
@@ -21,6 +21,56 @@ function PopupPaneSetup() {
     }
   }, [map]);
   return null;
+}
+
+// Renders ESI site markers only when map zoom >= 8 (region-level detail).
+// Below that threshold returns null — sites are too dense to read at country zoom.
+function EsiLayerManager({ data }: { data: any }) {
+  const [zoom, setZoom] = useState<number>(7);
+
+  useMapEvents({
+    zoomend: (e) => setZoom((e.target as L.Map).getZoom()),
+  });
+
+  if (!data || zoom < 8) return null;
+
+  const esiPointToLayer = (_feat: any, latlng: L.LatLng) => {
+    const html = `<div style="width:16px;height:16px;filter:drop-shadow(0 0 6px #F59E0BCC) drop-shadow(0 0 1.5px rgba(255,255,255,0.55));"><div style="background-color:#F59E0B;width:100%;height:100%;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);"></div></div>`;
+    return L.marker(latlng, {
+      icon: L.divIcon({ className: 'custom-div-icon', html, iconSize: [16, 16], iconAnchor: [8, 8] }),
+    });
+  };
+
+  const esiOnEachFeature = (feature: any, layer: any) => {
+    const p = feature.properties;
+    const capacityMwh = (p.capacity_kwh / 1000).toFixed(1);
+    layer.bindPopup(`
+      <div class="font-sans p-2">
+        <div class="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-2 border-b border-white/5 pb-1">ESI ASSET</div>
+        <div class="text-sm font-bold text-[#EDEFF7]">${p.name}</div>
+        <div class="text-[11px] mt-1 font-bold" style="color:#F59E0B;">${p.state}</div>
+        <div class="mt-3 space-y-2 border-t border-white/5 pt-2">
+          <div class="flex justify-between text-[10px]">
+            <span class="text-sunu-graphite uppercase font-bold">Capacity</span>
+            <span class="text-sunu-cloud font-mono">${capacityMwh} MWh</span>
+          </div>
+          <div class="text-[10px]">
+            <span class="text-sunu-graphite uppercase font-bold">Design Intent</span>
+            <div class="text-sunu-cloud mt-1 leading-relaxed">${p.intent}</div>
+          </div>
+        </div>
+      </div>
+    `, { className: 'custom-popup', pane: 'popupAboveAll' });
+  };
+
+  return (
+    <GeoJSON
+      key="esi-sites"
+      data={data}
+      pointToLayer={esiPointToLayer}
+      onEachFeature={esiOnEachFeature}
+    />
+  );
 }
 
 const setupIcons = () => {
@@ -45,8 +95,9 @@ export default function GridMap({ lang, filter }: Props) {
     regionalGrid: any,
     regionalNodes: any,
     tieLines: any,
-    consumers: any
-  }>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null });
+    consumers: any,
+    esiSites: any,
+  }>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null, esiSites: null });
 
   useEffect(() => {
     setupIcons();
@@ -56,7 +107,8 @@ export default function GridMap({ lang, filter }: Props) {
       regionalGrid: "/data/regional-interconnections.json",
       regionalNodes: "/data/regional-nodes.json",
       tieLines: "/data/infrastructure-tie-lines.json",
-      consumers: "/data/industrial-consumers.json"
+      consumers: "/data/industrial-consumers.json",
+      esiSites: "/data/sunupower-esi-sites.json",
     };
 
     Promise.all(Object.entries(urls).map(([key, url]) => 
@@ -224,6 +276,7 @@ export default function GridMap({ lang, filter }: Props) {
         {processedData.plants && <GeoJSON data={processedData.plants} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
         {processedData.regionalNodes && <GeoJSON data={processedData.regionalNodes} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
         {processedData.consumers && <GeoJSON data={processedData.consumers} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
+        <EsiLayerManager data={processedData.esiSites} />
       </MapContainer>
     </div>
   );

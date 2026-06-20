@@ -19,16 +19,13 @@ body {
   background: #121212 !important;
 }
 
-/* Leaflet popups must sit above the overlay panels (panels are z-[2000]) */
-.leaflet-popup-pane { z-index: 2500 !important; }
-
 /* macOS dark-mode frosted glass material */
 .glass-panel {
-  background: rgba(14, 14, 18, 0.62) !important;
-  backdrop-filter: blur(22px) saturate(180%) brightness(0.92) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(180%) brightness(0.92) !important;
-  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  background: rgba(14, 14, 18, 0.42) !important;
+  backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
 }

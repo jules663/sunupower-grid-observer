@@ -1,10 +1,27 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { GridFilter } from "@/app/page";
+
+// Popups must be in a pane that is a direct child of .leaflet-container, NOT
+// inside .leaflet-map-pane. The map-pane has a CSS transform (for panning) which
+// creates its own stacking context at z-index 400. Any z-index set on popup-pane
+// (inside map-pane) is trapped in that context and can never beat the overlay
+// panels at z-index 2000. By creating a sibling pane attached to the container
+// directly and giving it z-index 3000, popups escape the map-pane stacking context.
+function PopupPaneSetup() {
+  const map = useMap();
+  useEffect(() => {
+    if (!map.getPane('popupAboveAll')) {
+      const pane = map.createPane('popupAboveAll', map.getContainer());
+      pane.style.zIndex = '3000';
+    }
+  }, [map]);
+  return null;
+}
 
 const setupIcons = () => {
   if (typeof window === "undefined") return;
@@ -109,7 +126,13 @@ export default function GridMap({ lang, filter }: Props) {
 
   const gridStyle = (feature: any) => {
     const voltage = Number(feature.properties.voltage_kV);
-    if (voltage === 225) return { color: "#2579fc", weight: 3.5, opacity: 0.9, className: "hv-225-line" };
+    if (voltage === 225) {
+      const name = (feature.properties.name || '') as string;
+      const isOMVG = name.includes('OMVG') || name.includes('EDM') || name.includes('Trans-Gambia');
+      return isOMVG
+        ? { color: "#A78BFA", weight: 3.5, opacity: 0.9, className: "hv-225-intl-line" }
+        : { color: "#2579fc", weight: 3.5, opacity: 0.9, className: "hv-225-line" };
+    }
     if (voltage === 90) return { color: "#FDA206", weight: 2.2, opacity: 0.85, className: "hv-90-line" };
     return { color: "#00F2FF", weight: 1.5, opacity: 0.7, className: "mv-line" };
   };
@@ -130,7 +153,7 @@ export default function GridMap({ lang, filter }: Props) {
             ${lengthLabel}: <span class="text-sunu-cloud">${lengthDisplay} km</span>
           </div>
         </div>
-      `, { className: 'custom-popup' });
+      `, { className: 'custom-popup', pane: 'popupAboveAll' });
     }
   };
 
@@ -148,8 +171,9 @@ export default function GridMap({ lang, filter }: Props) {
 
     const isSubstation = p.fuel === "Substation";
     const size = isConsumer ? 14 : (isSubstation ? 8 : 12);
-    const iconHtml = isConsumer 
-        ? `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border: 2px solid rgba(255,255,255,1); clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); box-shadow: 0 0 15px ${color}CC;"></div>`
+    // Consumer hex: border+clip-path deforms at vertices — use wrapper+drop-shadow instead
+    const iconHtml = isConsumer
+        ? `<div style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 5px ${color}CC) drop-shadow(0 0 1px rgba(255,255,255,0.65));"><div style="background-color:${color};width:100%;height:100%;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);"></div></div>`
         : `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border: 2px solid rgba(255,255,255,1); border-radius: 50%; box-shadow: 0 0 15px ${color}CC;"></div>`;
 
     return L.marker(latlng, { icon: L.divIcon({ className: "custom-div-icon", html: iconHtml, iconSize: [size, size], iconAnchor: [size/2, size/2] }) });
@@ -175,7 +199,7 @@ export default function GridMap({ lang, filter }: Props) {
           ${p.annual_gen ? `<div class="flex justify-between text-[10px]"><span class="text-sunu-graphite uppercase font-bold">${lang === 'EN' ? 'Annual Gen' : 'Prod. Annuelle'}</span><span class="text-sunu-cloud font-mono">${p.annual_gen}</span></div>` : ''}
         </div>` : '');
 
-      layer.bindPopup(`<div class="text-sunu-arsenic font-sans p-2"><div class="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-2 border-b border-white/5 pb-1">${label}</div><div class="text-sm font-bold text-[#EDEFF7]">${p.name}</div><div class="text-[11px] mt-2.5 text-sunu-graphite uppercase font-bold tracking-wider">${p.fuel || p.type}${capDisplay}</div>${storage}${metadata}${p.country ? `<div class="text-[9px] text-sunu-space uppercase mt-2 opacity-60">${p.country}</div>` : ""}</div>`, { className: 'custom-popup' });
+      layer.bindPopup(`<div class="text-sunu-arsenic font-sans p-2"><div class="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-2 border-b border-white/5 pb-1">${label}</div><div class="text-sm font-bold text-[#EDEFF7]">${p.name}</div><div class="text-[11px] mt-2.5 text-sunu-graphite uppercase font-bold tracking-wider">${p.fuel || p.type}${capDisplay}</div>${storage}${metadata}${p.country ? `<div class="text-[9px] text-sunu-space uppercase mt-2 opacity-60">${p.country}</div>` : ""}</div>`, { className: 'custom-popup', pane: 'popupAboveAll' });
     }
   };
 
@@ -184,13 +208,15 @@ export default function GridMap({ lang, filter }: Props) {
       <style jsx global>{`
         .leaflet-container { background: #121212 !important; }
         .hv-225-line { filter: drop-shadow(0 0 4px #2579fcCC); }
+        .hv-225-intl-line { filter: drop-shadow(0 0 4px #A78BFACC); }
         .hv-90-line { filter: drop-shadow(0 0 3px #FDA206CC); }
         .mv-line { filter: drop-shadow(0 0 2px #00F2FF99); }
-        .custom-popup .leaflet-popup-content-wrapper { background: rgba(14, 14, 18, 0.68) !important; backdrop-filter: blur(22px) saturate(180%) brightness(0.92) !important; -webkit-backdrop-filter: blur(22px) saturate(180%) brightness(0.92) !important; color: #EDEFF7 !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.13) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.09) !important; }
-        .custom-popup .leaflet-popup-tip { background: rgba(14, 14, 18, 0.68) !important; backdrop-filter: blur(22px) !important; border: 1px solid rgba(255, 255, 255, 0.13) !important; box-shadow: none !important; }
+        .custom-popup .leaflet-popup-content-wrapper { background: rgba(14, 14, 18, 0.48) !important; backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important; -webkit-backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important; color: #EDEFF7 !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.10) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07) !important; }
+        .custom-popup .leaflet-popup-tip { background: rgba(14, 14, 18, 0.48) !important; backdrop-filter: blur(14px) !important; border: 1px solid rgba(255, 255, 255, 0.10) !important; box-shadow: none !important; }
         .leaflet-popup-content { margin: 16px 20px !important; width: auto !important; min-width: 220px; }
       `}</style>
       <MapContainer center={[13.8, -13.5] as any} zoom={7} scrollWheelZoom={true} zoomControl={false} zoomSnap={0.25} zoomDelta={0.5} wheelDebounceTime={40} wheelPxPerZoomLevel={100} className="w-full h-full">
+        <PopupPaneSetup />
         <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
         {processedData.grid && <GeoJSON key={`grid-${filter}`} data={processedData.grid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
         {processedData.regionalGrid && <GeoJSON key={`reg-${filter}`} data={processedData.regionalGrid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}

@@ -34,7 +34,9 @@ export default function Home() {
       coal: "Coal",
       hydro: "Hydro",
       industrial: "Industrial Off-taker",
-      substation: "Network Node"
+      substation: "Network Node",
+      senelec225: "SENELEC 225kV",
+      omvg225: "OMVG / Cross-border",
     },
     FR: {
       title: "Observateur de Réseau",
@@ -53,14 +55,16 @@ export default function Home() {
       coal: "Charbon",
       hydro: "Hydro",
       industrial: "Consommateur Industriel",
-      substation: "Nœud de Réseau"
+      substation: "Nœud de Réseau",
+      senelec225: "SENELEC 225kV",
+      omvg225: "OMVG / Transfrontalier",
     }
   }[lang];
 
   return (
     <main className="flex flex-col h-screen w-full bg-sunu-phantom overflow-hidden">
       {/* Header Trace - Canonical Branding with Interactive Filters */}
-      <header className="h-[72px] border-b border-white/[0.08] flex items-center justify-between px-8 z-[2000]" style={{background: 'rgba(14,14,18,0.72)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)'}}>
+      <header className="h-[72px] border-b border-white/[0.08] flex items-center justify-between px-8 z-[2000]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
         <div className="flex items-center gap-6">
           <div className="flex flex-col">
             <span className="text-sm uppercase tracking-[0.3em] font-bold text-sunu-cloud leading-tight">{t.title}</span>
@@ -116,7 +120,7 @@ export default function Home() {
       </header>
 
       {/* Mobile filter strip — visible below lg, hidden on desktop */}
-      <div className="lg:hidden shrink-0 flex items-center justify-around px-6 py-3 border-b border-white/[0.08]" style={{background: 'rgba(14,14,18,0.72)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)'}}>
+      <div className="lg:hidden shrink-0 flex items-center justify-around px-6 py-3 border-b border-white/[0.08]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
         <button
           onClick={() => setFilter(filter === "225" ? "ALL" : "225")}
           className={`flex items-center gap-2 transition-all cursor-pointer ${filter !== "ALL" && filter !== "225" ? "opacity-30" : "opacity-100"}`}
@@ -174,6 +178,17 @@ export default function Home() {
 
         {/* Legend Overlay — desktop only */}
         <div className="hidden lg:block absolute bottom-12 right-8 z-[2000] p-6 glass-panel rounded-xl text-left pointer-events-auto">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-3 px-1 border-b border-white/5 pb-3">HV Networks</div>
+            <div className="flex flex-col gap-2.5 mb-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-5 h-[2.5px] rounded-full bg-sunu-blue shadow-[0_0_6px_rgba(37,121,252,0.7)]" />
+                    <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.senelec225}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="w-5 h-[2.5px] rounded-full bg-[#A78BFA] shadow-[0_0_6px_rgba(167,139,250,0.7)]" />
+                    <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.omvg225}</span>
+                </div>
+            </div>
             <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-5 px-1 border-b border-white/5 pb-3">{t.fuelTitle}</div>
             <div className="grid grid-cols-2 gap-x-10 gap-y-4">
                 <div className="flex items-center gap-3">
@@ -197,7 +212,7 @@ export default function Home() {
                     <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.hydro}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-[#E91E63] border border-white/20 shadow-[0_0_8px_rgba(233,30,99,0.4)]" style={{clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'}} />
+                    <div style={{filter:'drop-shadow(0 0 4px rgba(233,30,99,0.5)) drop-shadow(0 0 1px rgba(255,255,255,0.25))'}}><div className="w-3 h-3 bg-[#E91E63]" style={{clipPath:'polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)'}}/></div>
                     <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.industrial}</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -229,7 +244,7 @@ export default function Home() {
           <div className="lg:hidden fixed inset-0 z-[4000]" onClick={() => setMobilePanel(null)}>
             <div
               className="absolute inset-x-0 bottom-0 max-h-[65vh] overflow-y-auto rounded-t-2xl"
-              style={{background: 'rgba(14,14,18,0.92)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)', borderTop: '1px solid rgba(255,255,255,0.13)', boxShadow: '0 -8px 32px rgba(0,0,0,0.5)'}}
+              style={{background: 'rgba(14,14,18,0.70)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)', borderTop: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 -8px 32px rgba(0,0,0,0.35)'}}
               onClick={e => e.stopPropagation()}
             >
               <div className="flex justify-center pt-3 pb-2">
@@ -260,6 +275,17 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="px-6 pb-8">
+                  <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-3 px-1 border-b border-white/5 pb-3">HV Networks</div>
+                  <div className="flex flex-col gap-2.5 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-[2.5px] rounded-full bg-sunu-blue shadow-[0_0_6px_rgba(37,121,252,0.7)]" />
+                      <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.senelec225}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-[2.5px] rounded-full bg-[#A78BFA] shadow-[0_0_6px_rgba(167,139,250,0.7)]" />
+                      <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.omvg225}</span>
+                    </div>
+                  </div>
                   <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-5 px-1 border-b border-white/5 pb-3">{t.fuelTitle}</div>
                   <div className="grid grid-cols-2 gap-x-10 gap-y-4">
                     <div className="flex items-center gap-3">
@@ -283,7 +309,7 @@ export default function Home() {
                       <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.hydro}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-[#E91E63] border border-white/20 shadow-[0_0_8px_rgba(233,30,99,0.4)]" style={{clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'}} />
+                      <div style={{filter:'drop-shadow(0 0 4px rgba(233,30,99,0.5)) drop-shadow(0 0 1px rgba(255,255,255,0.25))'}}><div className="w-3 h-3 bg-[#E91E63]" style={{clipPath:'polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)'}}/></div>
                       <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.industrial}</span>
                     </div>
                     <div className="flex items-center gap-3">

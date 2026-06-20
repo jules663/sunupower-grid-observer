@@ -18,7 +18,7 @@ export default function Home() {
   const t = {
     EN: {
       title: "Grid Observer",
-      subtitle: "Unified Infrastructure Advisor v1.3",
+      subtitle: "Unified Infrastructure Advisor v1.4",
       backbone: "225kV Backbone",
       subBackbone: "90kV Sub-backbone",
       mv: "MV Grid",
@@ -36,7 +36,7 @@ export default function Home() {
     },
     FR: {
       title: "Observateur de Réseau",
-      subtitle: "Conseiller en Infrastructures Unifiées v1.2",
+      subtitle: "Conseiller en Infrastructures Unifiées v1.4",
       backbone: "Dorsale 225kV",
       subBackbone: "Sous-dorsale 90kV",
       mv: "Réseau MT",
@@ -56,6 +56,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col h-screen w-full bg-sunu-phantom overflow-hidden">
+      {/* Header Trace - Canonical Branding with Interactive Filters */}
       <header className="h-[72px] border-b border-white/5 flex items-center justify-between px-8 bg-sunu-arsenic/40 backdrop-blur-3xl z-[2000]">
         <div className="flex items-center gap-6">
           <div className="flex flex-col">
@@ -67,25 +68,25 @@ export default function Home() {
         <div className="hidden lg:flex items-center gap-10">
           <button 
             onClick={() => setFilter(filter === "225" ? "ALL" : "225")}
-            className={`flex items-center gap-2.5 transition-all ${filter !== "ALL" && filter !== "225" ? "opacity-30" : "opacity-100"}`}
+            className={`flex items-center gap-2.5 transition-all cursor-pointer ${filter !== "ALL" && filter !== "225" ? "opacity-30" : "opacity-100"}`}
           >
-            <div className="w-2 h-2 rounded-full bg-sunu-blue shadow-[0_0_12px_rgba(37,121,252,0.8)]" />
+            <div className={`w-2 h-2 rounded-full bg-sunu-blue transition-all ${filter === "225" ? "scale-125 shadow-[0_0_12px_#2579fc]" : "shadow-[0_0_12px_rgba(37,121,252,0.8)]"}`} />
             <span className={`text-[11px] uppercase tracking-widest font-bold ${filter === "225" ? "text-sunu-blue" : "text-sunu-space"}`}>{t.backbone}</span>
           </button>
           
           <button 
             onClick={() => setFilter(filter === "90" ? "ALL" : "90")}
-            className={`flex items-center gap-2.5 transition-all ${filter !== "ALL" && filter !== "90" ? "opacity-30" : "opacity-100"}`}
+            className={`flex items-center gap-2.5 transition-all cursor-pointer ${filter !== "ALL" && filter !== "90" ? "opacity-30" : "opacity-100"}`}
           >
-            <div className="w-2 h-2 rounded-full bg-sunu-orange shadow-[0_0_10px_rgba(253,162,6,0.8)]" />
+            <div className={`w-2 h-2 rounded-full bg-sunu-orange transition-all ${filter === "90" ? "scale-125 shadow-[0_0_12px_#FDA206]" : "shadow-[0_0_12px_rgba(253,162,6,0.8)]"}`} />
             <span className={`text-[11px] uppercase tracking-widest font-bold ${filter === "90" ? "text-sunu-orange" : "text-sunu-space"}`}>{t.subBackbone}</span>
           </button>
           
           <button 
             onClick={() => setFilter(filter === "MV" ? "ALL" : "MV")}
-            className={`flex items-center gap-2.5 transition-all ${filter !== "ALL" && filter !== "MV" ? "opacity-30" : "opacity-100"}`}
+            className={`flex items-center gap-2.5 transition-all cursor-pointer ${filter !== "ALL" && filter !== "MV" ? "opacity-30" : "opacity-100"}`}
           >
-            <div className="w-2 h-2 rounded-full bg-[#00F2FF] shadow-[0_0_10px_rgba(0,242,255,0.7)]" />
+            <div className={`w-2 h-2 rounded-full bg-[#00F2FF] transition-all ${filter === "MV" ? "scale-125 shadow-[0_0_12px_#00F2FF]" : "shadow-[0_0_10px_rgba(0,242,255,0.7)]"}`} />
             <span className={`text-[11px] uppercase tracking-widest font-bold ${filter === "MV" ? "text-[#00F2FF]" : "text-sunu-space"}`}>{t.mv}</span>
           </button>
         </div>
@@ -111,9 +112,11 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Main Map Content */}
       <div className="flex-1 relative">
         <GridMap lang={lang} filter={filter} />
         
+        {/* Meta Stats Panel */}
         <div className="absolute top-8 left-8 z-[2000] w-[340px] space-y-4 pointer-events-none">
             <div className="bg-white/[0.03] backdrop-blur-3xl p-7 rounded-xl border border-white/10 pointer-events-auto">
                 <div className="text-[11px] uppercase tracking-[0.3em] text-sunu-graphite font-bold mb-5 border-b border-white/5 pb-3">{t.contextTitle}</div>
@@ -144,6 +147,7 @@ export default function Home() {
             </div>
         </div>
 
+        {/* Legend Overlay */}
         <div className="absolute bottom-12 right-8 z-[2000] p-6 bg-white/[0.03] backdrop-blur-3xl rounded-xl border border-white/10 text-left pointer-events-auto">
             <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-5 px-1 border-b border-white/5 pb-3">{t.fuelTitle}</div>
             <div className="grid grid-cols-2 gap-x-10 gap-y-4">

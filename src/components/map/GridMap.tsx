@@ -37,7 +37,7 @@ function EsiLayerManager({ data }: { data: any }) {
   const esiPointToLayer = (_feat: any, latlng: L.LatLng) => {
     const html = `<div style="width:16px;height:16px;filter:drop-shadow(0 0 6px #F59E0BCC) drop-shadow(0 0 1.5px rgba(255,255,255,0.55));"><div style="background-color:#F59E0B;width:100%;height:100%;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);"></div></div>`;
     return L.marker(latlng, {
-      icon: L.divIcon({ className: 'custom-div-icon', html, iconSize: [16, 16], iconAnchor: [8, 8] }),
+      icon: L.divIcon({ className: 'custom-div-icon', html, iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] }),
     });
   };
 
@@ -60,7 +60,7 @@ function EsiLayerManager({ data }: { data: any }) {
           </div>
         </div>
       </div>
-    `, { className: 'custom-popup', pane: 'popupAboveAll' });
+    `, { className: 'custom-popup', pane: 'popupAboveAll', autoPan: false });
   };
 
   return (
@@ -269,7 +269,8 @@ export default function GridMap({ lang, filter }: Props) {
       `}</style>
       <MapContainer center={[13.8, -13.5] as any} zoom={7} scrollWheelZoom={true} zoomControl={false} zoomSnap={0.25} zoomDelta={0.5} wheelDebounceTime={40} wheelPxPerZoomLevel={100} className="w-full h-full">
         <PopupPaneSetup />
-        <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+        <TileLayer attribution='Tiles &copy; <a href="https://www.esri.com/">Esri</a>' url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}" />
+        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}" />
         {processedData.grid && <GeoJSON key={`grid-${filter}`} data={processedData.grid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
         {processedData.regionalGrid && <GeoJSON key={`reg-${filter}`} data={processedData.regionalGrid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
         {processedData.tieLines && <GeoJSON key={`tie-${filter}`} data={processedData.tieLines} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}

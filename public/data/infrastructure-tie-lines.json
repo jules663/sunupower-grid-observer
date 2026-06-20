@@ -14,12 +14,52 @@
     {
       "type": "Feature",
       "properties": { "name": "Sabodala Mine Feeder", "voltage_kV": 225, "length_km": 45.1 },
-      "geometry": { "type": "LineString", "coordinates": [[-12.110, 12.810], [-12.650, 12.550]] }
+      "geometry": { "type": "LineString", "coordinates": [[-12.110, 12.810], [-12.270, 12.740], [-12.440, 12.652], [-12.560, 12.582], [-12.650, 12.550]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Diamniadio Hub Connection", "voltage_kV": 90, "length_km": 8.4 },
       "geometry": { "type": "LineString", "coordinates": [[-17.280, 14.720], [-17.324, 14.734]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Kaolack-Kaffrine 90kV Backbone", "voltage_kV": 90, "length_km": 178.0 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-16.030, 14.150],
+          [-15.620, 14.148],
+          [-15.250, 14.145],
+          [-14.900, 14.148],
+          [-14.650, 14.150]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Kaffrine-Tambacounda 90kV Backbone", "voltage_kV": 90, "length_km": 112.0 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-14.650, 14.150],
+          [-14.350, 14.020],
+          [-14.050, 13.900],
+          [-13.750, 13.750]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Koungheul 90kV Spur", "voltage_kV": 90, "length_km": 58.0 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-14.650, 14.150],
+          [-14.520, 14.320],
+          [-14.380, 14.490],
+          [-14.250, 14.650]
+        ]
+      }
     }
   ]
 }

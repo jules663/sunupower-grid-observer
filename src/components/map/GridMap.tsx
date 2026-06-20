@@ -186,11 +186,11 @@ export default function GridMap({ lang, filter }: Props) {
         .hv-225-line { filter: drop-shadow(0 0 4px #2579fcCC); }
         .hv-90-line { filter: drop-shadow(0 0 3px #FDA206CC); }
         .mv-line { filter: drop-shadow(0 0 2px #00F2FF99); }
-        .custom-popup .leaflet-popup-content-wrapper { background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(40px) saturate(180%) !important; -webkit-backdrop-filter: blur(40px) saturate(180%) !important; color: #EDEFF7 !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: none !important; }
-        .custom-popup .leaflet-popup-tip { background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(40px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: none !important; }
+        .custom-popup .leaflet-popup-content-wrapper { background: rgba(14, 14, 18, 0.68) !important; backdrop-filter: blur(22px) saturate(180%) brightness(0.92) !important; -webkit-backdrop-filter: blur(22px) saturate(180%) brightness(0.92) !important; color: #EDEFF7 !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.13) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.09) !important; }
+        .custom-popup .leaflet-popup-tip { background: rgba(14, 14, 18, 0.68) !important; backdrop-filter: blur(22px) !important; border: 1px solid rgba(255, 255, 255, 0.13) !important; box-shadow: none !important; }
         .leaflet-popup-content { margin: 16px 20px !important; width: auto !important; min-width: 220px; }
       `}</style>
-      <MapContainer center={[13.8, -13.5] as any} zoom={7} scrollWheelZoom={true} zoomControl={false} className="w-full h-full">
+      <MapContainer center={[13.8, -13.5] as any} zoom={7} scrollWheelZoom={true} zoomControl={false} zoomSnap={0.25} zoomDelta={0.5} wheelDebounceTime={40} wheelPxPerZoomLevel={100} className="w-full h-full">
         <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
         {processedData.grid && <GeoJSON key={`grid-${filter}`} data={processedData.grid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
         {processedData.regionalGrid && <GeoJSON key={`reg-${filter}`} data={processedData.regionalGrid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}

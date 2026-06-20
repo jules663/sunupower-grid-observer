@@ -25,7 +25,7 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-17.280, 14.720] },
+      "geometry": { "type": "Point", "coordinates": [-17.252, 14.740] },
       "properties": {
         "name": "Diamniadio Industrial Platform",
         "type": "SEZ",

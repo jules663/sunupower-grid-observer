@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Sendou Injection Line", "voltage_kV": 225, "length_km": 12.4 },
+      "geometry": { "type": "LineString", "coordinates": [[-17.228, 14.692], [-17.324, 14.734]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Taiba N'Diaye Wind Link", "voltage_kV": 225, "length_km": 8.5 },
+      "geometry": { "type": "LineString", "coordinates": [[-16.883, 15.166], [-16.857, 15.111]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Sabodala Mine Feeder", "voltage_kV": 225, "length_km": 45.1 },
+      "geometry": { "type": "LineString", "coordinates": [[-12.110, 12.810], [-12.650, 12.550]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Diamniadio Hub Connection", "voltage_kV": 90, "length_km": 8.4 },
+      "geometry": { "type": "LineString", "coordinates": [[-17.280, 14.720], [-17.324, 14.734]] }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-17.4677, 14.7167] },
+      "properties": {
+        "id": "ESI-DKR-URN-001",
+        "name": "Dakar Urban Node",
+        "type": "ESI Asset",
+        "capacity_kwh": 5000,
+        "state": "Commissioned",
+        "intent": "Urban resilience and peak load buffering."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-16.936, 14.791] },
+      "properties": {
+        "id": "ESI-THI-RLC-001",
+        "name": "Thiès Reliability Corridor",
+        "type": "ESI Asset",
+        "capacity_kwh": 3500,
+        "state": "Under Maintenance",
+        "intent": "Grid stabilization for industrial corridor."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-16.4818, 16.0326] },
+      "properties": {
+        "id": "ESI-STL-CON-001",
+        "name": "Saint-Louis Coastal Node",
+        "type": "ESI Asset",
+        "capacity_kwh": 2500,
+        "state": "Planned",
+        "intent": "Coastal infrastructure support and backup."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-16.083, 14.145] },
+      "properties": {
+        "id": "ESI-KOL-GSH-001",
+        "name": "Kaolack Grid Support Hub",
+        "type": "ESI Asset",
+        "capacity_kwh": 4000,
+        "state": "Under Deployment",
+        "intent": "Regional frequency support and storage buffering."
+      }
+    }
+  ]
+}

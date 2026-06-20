@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "SENELEC-EDM Interconnection", "voltage_kV": 225, "length_km": 305.2, "status": "Existing" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-13.750, 13.750],
+          [-12.457, 14.901],
+          [-11.445, 14.437]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "OMVG North-South Backbone", "voltage_kV": 225, "length_km": 284.5, "status": "Existing" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-16.030, 14.150],
+          [-15.744, 14.129],
+          [-15.533, 13.433],
+          [-15.424, 12.654],
+          [-15.319, 12.073]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Trans-Gambia Interconnector", "voltage_kV": 225, "length_km": 128.1, "status": "Existing" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-15.533, 13.433],
+          [-16.150, 13.250],
+          [-16.649, 13.271]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Casamance Regional Link", "voltage_kV": 225, "length_km": 92.4, "status": "Existing" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-15.424, 12.654],
+          [-16.250, 12.550]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Haute Casamance Link", "voltage_kV": 225, "length_km": 74.8, "status": "Existing" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-15.424, 12.654],
+          [-14.850, 13.150]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-12.110, 12.810] },
+      "properties": {
+        "name": "Sabodala-Massawa Gold Mine",
+        "type": "Mining",
+        "sector": "Gold",
+        "demand_profile": "High-Load Industrial",
+        "status": "Operational"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-16.850, 15.220] },
+      "properties": {
+        "name": "GCO Mineral Sands (Diogo)",
+        "type": "Mining",
+        "sector": "Zircon/Ilmenite",
+        "demand_profile": "Baseline Coastal Load",
+        "status": "Operational"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-17.280, 14.720] },
+      "properties": {
+        "name": "Diamniadio Industrial Platform",
+        "type": "SEZ",
+        "sector": "Manufacturing/Tech",
+        "demand_profile": "Urban-Industrial Hybrid",
+        "status": "Operational"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-17.070, 14.650] },
+      "properties": {
+        "name": "ZESID Diass (AIBD Zone)",
+        "type": "SEZ",
+        "sector": "Logistics/Aviation",
+        "demand_profile": "Strategic Hub Load",
+        "status": "Operational"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-16.780, 14.470] },
+      "properties": {
+        "name": "Sandiara Special Economic Zone",
+        "type": "SEZ",
+        "sector": "Agro-processing/Energy",
+        "demand_profile": "Solar-Industrial Hybrid",
+        "status": "Operational"
+      }
+    }
+  ]
+}

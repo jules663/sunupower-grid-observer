@@ -6,12 +6,17 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { GridFilter } from "@/app/page";
 
-// Popups must be in a pane that is a direct child of .leaflet-container, NOT
-// inside .leaflet-map-pane. The map-pane has a CSS transform (for panning) which
-// creates its own stacking context at z-index 400. Any z-index set on popup-pane
-// (inside map-pane) is trapped in that context and can never beat the overlay
-// panels at z-index 2000. By creating a sibling pane attached to the container
-// directly and giving it z-index 3000, popups escape the map-pane stacking context.
+// Popups live in a pane that is a direct child of .leaflet-container, NOT inside
+// .leaflet-map-pane. Reason: .leaflet-map-pane has a CSS transform which creates
+// its own stacking context at z-index 400, trapping popup z-index below the glass
+// overlay panels (z-index 2000). By parenting this pane to the container at
+// z-index 3000, popups escape that stacking context and render above panels.
+//
+// Positioning correctness: Leaflet pans by applying transform:translate(dx,dy) to
+// .leaflet-map-pane. Our pane does not receive that transform automatically.
+// We mirror the map-pane transform here on every 'move' and 'viewreset' so that
+// latLngToLayerPoint coordinates placed inside our pane land at the same screen
+// position as they would inside the map-pane.
 function PopupPaneSetup() {
   const map = useMap();
   useEffect(() => {
@@ -19,6 +24,20 @@ function PopupPaneSetup() {
       const pane = map.createPane('popupAboveAll', map.getContainer());
       pane.style.zIndex = '3000';
     }
+
+    const pane = map.getPane('popupAboveAll')!;
+    const mapPane = map.getPanes().mapPane;
+
+    const syncTransform = () => {
+      L.DomUtil.setPosition(pane, L.DomUtil.getPosition(mapPane));
+    };
+
+    map.on('move viewreset', syncTransform);
+    syncTransform();
+
+    return () => {
+      map.off('move viewreset', syncTransform);
+    };
   }, [map]);
   return null;
 }
@@ -60,7 +79,7 @@ function EsiLayerManager({ data }: { data: any }) {
           </div>
         </div>
       </div>
-    `, { className: 'custom-popup', pane: 'popupAboveAll', autoPan: false });
+    `, { className: 'custom-popup', pane: 'popupAboveAll' });
   };
 
   return (

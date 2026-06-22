@@ -587,32 +587,6 @@
         "from": null,
         "to": null,
         "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -16.06332018506785,
-            14.06887578136135
-          ],
-          [
-            -16.062850975944652,
-            14.068865511986132
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
         "length_km": "14"
       },
       "geometry": {
@@ -659,32 +633,6 @@
           [
             -16.342982890886702,
             14.055385708837946
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "4"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -17.020474413981056,
-            14.460065828668604
-          ],
-          [
-            -16.995561685595938,
-            14.487665654956224
           ]
         ]
       }
@@ -1563,32 +1511,6 @@
         "from": null,
         "to": null,
         "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -15.852442199265525,
-            14.128052545709743
-          ],
-          [
-            -15.852392377515066,
-            14.128275254193127
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
         "length_km": "15"
       },
       "geometry": {
@@ -2287,32 +2209,6 @@
         "from": null,
         "to": null,
         "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -12.981051100286624,
-            15.204652612346962
-          ],
-          [
-            -12.981672766190979,
-            15.204140856953963
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
         "length_km": "13"
       },
       "geometry": {
@@ -2433,32 +2329,6 @@
         "from": null,
         "to": null,
         "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -13.47769710776219,
-            15.801965543851892
-          ],
-          [
-            -13.476526713924965,
-            15.802529581996794
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
         "length_km": "1"
       },
       "geometry": {
@@ -2471,32 +2341,6 @@
           [
             -13.475762003848015,
             15.834952122514693
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -13.488166078606636,
-            15.831573303970629
-          ],
-          [
-            -13.487266098419106,
-            15.831818454842939
           ]
         ]
       }
@@ -2587,32 +2431,6 @@
           [
             -13.414639660195828,
             16.025544679467977
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -14.003915990456097,
-            16.18395846092131
-          ],
-          [
-            -14.00311442894311,
-            16.184637810138902
           ]
         ]
       }
@@ -3057,32 +2875,6 @@
         "from": null,
         "to": null,
         "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -16.845313306411867,
-            14.776005010100675
-          ],
-          [
-            -16.84546655698339,
-            14.776580898779642
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
         "length_km": "8"
       },
       "geometry": {
@@ -3281,32 +3073,6 @@
         "from": null,
         "to": null,
         "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -16.539540369428117,
-            14.734198427713523
-          ],
-          [
-            -16.539539917544165,
-            14.734288486555776
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
         "length_km": "3"
       },
       "geometry": {
@@ -3345,32 +3111,6 @@
           [
             -16.532339826037955,
             14.758550157009061
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -16.539496343015912,
-            14.742972732055641
-          ],
-          [
-            -16.53907817375465,
-            14.743882951413127
           ]
         ]
       }
@@ -3501,32 +3241,6 @@
           [
             -16.0375969704566,
             14.258002573945824
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -16.14361806734198,
-            14.52490398371937
-          ],
-          [
-            -16.142426117390972,
-            14.526290589534156
           ]
         ]
       }
@@ -4031,32 +3745,6 @@
           [
             -16.103853406335645,
             12.659318482576452
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -16.355542910674938,
-            12.878942505519555
-          ],
-          [
-            -16.355273658424842,
-            12.88035570786226
           ]
         ]
       }
@@ -5709,58 +5397,6 @@
         "from": null,
         "to": null,
         "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -15.86990170902206,
-            13.822489092244702
-          ],
-          [
-            -15.869905233190782,
-            13.822508674731461
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "9"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -17.03747242859606,
-            14.599149299031467
-          ],
-          [
-            -17.118966245069146,
-            14.580667453813533
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
         "length_km": "3"
       },
       "geometry": {
@@ -6197,32 +5833,6 @@
           [
             -12.202294600601931,
             14.413863667247028
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "WB map archive IBRD #33982; Apr 2005",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 30,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -17.096442190550874,
-            14.837558469769789
-          ],
-          [
-            -17.096071161891434,
-            14.83751878098029
           ]
         ]
       }
@@ -11485,36 +11095,6 @@
           [
             -17.153942616720816,
             14.731042243507614
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "status": "Existing",
-        "country": "Senegal",
-        "source": "ECREEE",
-        "operator": null,
-        "from": null,
-        "to": null,
-        "voltage_kV": 90,
-        "length_km": "0"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -17.15394261671949,
-            14.731042243499333
-          ],
-          [
-            -17.154615348633556,
-            14.732197691712322
-          ],
-          [
-            -17.154736411143126,
-            14.73238849877885
           ]
         ]
       }

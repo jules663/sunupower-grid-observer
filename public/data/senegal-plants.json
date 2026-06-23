@@ -14,7 +14,7 @@
     { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-12.210, 13.150] }, "properties": { "name": "Sambangalou (Hydro - Planned)", "type": "Power Plant", "fuel": "Hydro", "capacity_mw": 128, "operator": "OMVG", "commissioned": "TBD" } },
     { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-14.850, 13.150] }, "properties": { "name": "Kolda Solar+BESS", "type": "Power Plant", "fuel": "Solar", "capacity_mw": 60, "operator": "Axian Energy", "commissioned": "2025", "storage_mwh": 72 } },
     { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-17.458, 14.678] }, "properties": { "name": "Bel-Air Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0 } },
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-17.428, 14.718] }, "properties": { "name": "Hann Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0 } },
+    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-17.4375, 14.7318] }, "properties": { "name": "Hann Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0 } },
     { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-17.405, 14.758] }, "properties": { "name": "Patte d'Oie Hub", "type": "Substation", "fuel": "Substation", "capacity_mw": 0 } },
     { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-16.450, 15.050] }, "properties": { "name": "Thies Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0 } },
     { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-15.980, 14.750] }, "properties": { "name": "Diourbel Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0 } },

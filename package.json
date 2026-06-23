@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "validate-data": "node scripts/validate-data.mjs",
+    "dedupe-grid": "node scripts/dedupe-grid.mjs"
   },
   "dependencies": {
     "next": "14.2.3",

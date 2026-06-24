@@ -5,18 +5,21 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Globe, Info, Layers } from "lucide-react";
 import type { GridStats } from "@/components/map/GridMap";
-import { ContextPanel, Legend } from "@/components/ui/panels";
+import { ContextPanel, Legend, ReliabilityLegend } from "@/components/ui/panels";
 import { FilterControls } from "@/components/ui/FilterControls";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 
 const GridMap = dynamic(() => import("@/components/map/GridMap"), {
   ssr: false,
 });
 
 export type GridFilter = "ALL" | "225" | "90" | "MV";
+export type ViewMode = "infrastructure" | "reliability";
 
 export default function Home() {
   const [lang, setLang] = useState<"EN" | "FR">("EN");
   const [filter, setFilter] = useState<GridFilter>("ALL");
+  const [view, setView] = useState<ViewMode>("reliability");
   const [mobilePanel, setMobilePanel] = useState<null | "context" | "legend">(null);
   const [stats, setStats] = useState<GridStats | null>(null);
 
@@ -63,6 +66,18 @@ export default function Home() {
       infoBtn: "Info",
       legendBtn: "Legend",
       mapLabel: "Senegal electricity transmission network map",
+      viewInfra: "Infrastructure",
+      viewReliability: "Reliability",
+      reliabilityTitle: "Reliability Index",
+      relScale: "Stress Score",
+      relLow: "Low",
+      relHigh: "High",
+      relBaseline: "No events",
+      confidenceTitle: "Data Confidence",
+      confMeasured: "Measured",
+      confReported: "Reported",
+      confModeled: "Modeled",
+      relLegalNote: "Reliability index is indicative — seeded from public & modeled data. Measured utility/ESI telemetry supersedes it as available.",
     },
     FR: {
       title: "Observateur de Réseau",
@@ -90,6 +105,18 @@ export default function Home() {
       infoBtn: "Info",
       legendBtn: "Légende",
       mapLabel: "Carte du réseau de transport d'électricité du Sénégal",
+      viewInfra: "Infrastructure",
+      viewReliability: "Fiabilité",
+      reliabilityTitle: "Indice de Fiabilité",
+      relScale: "Score de Stress",
+      relLow: "Faible",
+      relHigh: "Élevé",
+      relBaseline: "Aucun évènement",
+      confidenceTitle: "Confiance des Données",
+      confMeasured: "Mesuré",
+      confReported: "Rapporté",
+      confModeled: "Modélisé",
+      relLegalNote: "L'indice de fiabilité est indicatif — basé sur des données publiques et modélisées. La télémétrie mesurée (réseau/ESI) le remplace dès que disponible.",
     },
   }[lang];
 
@@ -118,7 +145,10 @@ export default function Home() {
           <FilterControls t={t} filter={filter} setFilter={setFilter} variant="desktop" />
         </div>
 
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-5">
+          <div className="hidden md:block">
+            <ViewToggle t={t} view={view} setView={setView} />
+          </div>
           <button
             type="button"
             onClick={() => setLang(lang === "EN" ? "FR" : "EN")}
@@ -136,13 +166,18 @@ export default function Home() {
       </header>
 
       {/* Mobile filter strip — visible below lg, hidden on desktop */}
-      <div className="lg:hidden shrink-0 flex items-center justify-around px-6 py-3 border-b border-white/[0.08]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}} role="group" aria-label={t.fuelTitle}>
-        <FilterControls t={t} filter={filter} setFilter={setFilter} variant="mobile" />
+      <div className="lg:hidden shrink-0 flex flex-col gap-3 px-6 py-3 border-b border-white/[0.08]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
+        <div className="flex justify-center md:hidden">
+          <ViewToggle t={t} view={view} setView={setView} />
+        </div>
+        <div className="flex items-center justify-around" role="group" aria-label={t.fuelTitle}>
+          <FilterControls t={t} filter={filter} setFilter={setFilter} variant="mobile" />
+        </div>
       </div>
 
       {/* Main Map Content */}
       <div id="grid-map" className="flex-1 relative min-h-0" role="region" aria-label={t.mapLabel}>
-        <GridMap lang={lang} filter={filter} onStats={handleStats} />
+        <GridMap lang={lang} filter={filter} view={view} onStats={handleStats} />
 
         {/* Meta Stats Panel — desktop only */}
         <div className="hidden lg:block absolute top-8 left-8 z-[2000] w-[340px] space-y-4 pointer-events-none">
@@ -152,8 +187,8 @@ export default function Home() {
         </div>
 
         {/* Legend Overlay — desktop only */}
-        <div className="hidden lg:block absolute bottom-12 right-8 z-[2000] p-6 glass-panel rounded-xl text-left pointer-events-auto">
-          <Legend t={t} />
+        <div className="hidden lg:block absolute bottom-12 right-8 z-[2000] p-6 glass-panel rounded-xl text-left pointer-events-auto w-[280px]">
+          {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} />}
         </div>
 
         {/* Mobile panel toggle buttons — bottom-left (Info) and bottom-right (Legend) */}
@@ -200,7 +235,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="px-6 pb-8">
-                  <Legend t={t} />
+                  {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} />}
                 </div>
               )}
             </div>

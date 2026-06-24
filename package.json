@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "validate-data": "node scripts/validate-data.mjs",
-    "dedupe-grid": "node scripts/dedupe-grid.mjs"
+    "dedupe-grid": "node scripts/dedupe-grid.mjs",
+    "add-asset-ids": "node scripts/add-asset-ids.mjs"
   },
   "dependencies": {
     "next": "14.2.3",

@@ -1,0 +1,125 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.45,
+          15.05
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0001",
+        "asset_ref": "thies-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2024-04-15T06:00:00Z",
+        "end": "2024-04-15T14:00:00Z",
+        "duration_min": 480,
+        "cause": "Transformer overhaul (planned)",
+        "severity": "low",
+        "planned": true,
+        "source": "Reported (sector schedule)",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -15.98,
+          14.75
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0002",
+        "asset_ref": "diourbel-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2023-10-02T07:00:00Z",
+        "end": "2023-10-02T12:30:00Z",
+        "duration_min": 330,
+        "cause": "Protection relay upgrade",
+        "severity": "low",
+        "planned": true,
+        "source": "Reported",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0003",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2024-02-20T05:30:00Z",
+        "end": "2024-02-20T11:00:00Z",
+        "duration_min": 330,
+        "cause": "Busbar maintenance",
+        "severity": "medium",
+        "planned": true,
+        "source": "Reported",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.03,
+          14.15
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0004",
+        "asset_ref": "kaolack-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2023-06-11T06:00:00Z",
+        "end": "2023-06-11T10:00:00Z",
+        "duration_min": 240,
+        "cause": "Switchgear servicing",
+        "severity": "low",
+        "planned": true,
+        "source": "Reported",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.458,
+          14.678
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0005",
+        "asset_ref": "bel-air-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2024-08-05T05:00:00Z",
+        "end": "2024-08-05T13:00:00Z",
+        "duration_min": 480,
+        "cause": "225/30kV transformer inspection",
+        "severity": "medium",
+        "planned": true,
+        "source": "Reported",
+        "confidence": "reported"
+      }
+    }
+  ]
+}

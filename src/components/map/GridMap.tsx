@@ -4,11 +4,13 @@ import { useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer, GeoJSON, ZoomControl, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { GridFilter } from "@/app/page";
+import { GridFilter, ViewMode } from "@/app/page";
 import type {
   GridData, LineFeature, LineProps, NodeFeature, NodeProps,
-  EsiProps, Coordinate, LineCollection,
+  EsiProps, Coordinate, LineCollection, EventCollection, ReliabilityProfile,
 } from "@/types/grid";
+import { computeReliability, heatColor, heatRadius, availableYears, type YearFilter } from "@/lib/reliability";
+import { SHOW_ESI_SITES } from "@/lib/config";
 
 // Popups live in a pane that is a direct child of .leaflet-container, NOT inside
 // .leaflet-map-pane. Reason: .leaflet-map-pane has a CSS transform which creates
@@ -42,6 +44,22 @@ function PopupPaneSetup() {
     return () => {
       map.off('move viewreset', syncTransform);
     };
+  }, [map]);
+  return null;
+}
+
+// Creates a dedicated pane for place-name label tiles, sitting above the grid
+// overlays (default overlayPane = 400) so labels stay legible over the network.
+function LabelPaneSetup() {
+  const map = useMap();
+  useEffect(() => {
+    if (!map.getPane('labels')) {
+      const pane = map.createPane('labels');
+      // Above the grid-line overlay pane (400) but BELOW the marker pane (600),
+      // so region labels stay legible over the lines yet never cover the nodes.
+      pane.style.zIndex = '550';
+      pane.style.pointerEvents = 'none';
+    }
   }, [map]);
   return null;
 }
@@ -122,24 +140,30 @@ export interface GridStats {
 interface Props {
     lang: "EN" | "FR";
     filter: GridFilter;
+    view: ViewMode;
     onStats?: (stats: GridStats) => void;
 }
 
-export default function GridMap({ lang, filter, onStats }: Props) {
-  const [data, setData] = useState<GridData>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null, esiSites: null });
+export default function GridMap({ lang, filter, view, onStats }: Props) {
+  const [data, setData] = useState<GridData>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null, esiSites: null, outageEvents: null, maintenanceEvents: null });
   const [loadError, setLoadError] = useState<boolean>(false);
+  const [senegalBorder, setSenegalBorder] = useState<GeoJSON.Feature | null>(null);
 
   useEffect(() => {
     setupIcons();
-    const urls = {
+    const urls: Partial<Record<keyof GridData, string>> = {
       grid: "/data/senegal-grid.json",
       plants: "/data/senegal-plants.json",
       regionalGrid: "/data/regional-interconnections.json",
       regionalNodes: "/data/regional-nodes.json",
       tieLines: "/data/infrastructure-tie-lines.json",
       consumers: "/data/industrial-consumers.json",
-      esiSites: "/data/sunupower-esi-sites.json",
+      outageEvents: "/data/outage-events.json",
+      maintenanceEvents: "/data/maintenance-events.json",
     };
+    // ESI sites are simulated placeholders — only fetched when the layer is
+    // enabled (see src/lib/config.ts), so simulated data isn't even served.
+    if (SHOW_ESI_SITES) urls.esiSites = "/data/sunupower-esi-sites.json";
 
     Promise.all(Object.entries(urls).map(([key, url]) =>
       fetch(url).then(r => {
@@ -155,6 +179,12 @@ export default function GridMap({ lang, filter, onStats }: Props) {
       console.error("GridMap data load failed:", err);
       setLoadError(true);
     });
+
+    // National boundary outline — non-blocking; the map works without it.
+    fetch("/data/senegal-border.json")
+      .then(r => (r.ok ? r.json() : null))
+      .then(b => { if (b) setSenegalBorder(b); })
+      .catch(() => { /* boundary is decorative; ignore failure */ });
   }, []);
 
   // Compute headline stats from the loaded data so the context panel can never
@@ -177,10 +207,25 @@ export default function GridMap({ lang, filter, onStats }: Props) {
       countPts(data.plants) +
       countPts(data.regionalNodes) +
       countPts(data.consumers) +
-      countPts(data.esiSites);
+      (SHOW_ESI_SITES ? countPts(data.esiSites) : 0);
 
     onStats({ totalKm: Math.round(totalKm), nodeCount });
   }, [data, onStats]);
+
+  // Time slider (Phase 3): which calendar year of events to show, or "all".
+  const [year, setYear] = useState<YearFilter>("all");
+  const years = useMemo(
+    () => availableYears(data.outageEvents ?? null, data.maintenanceEvents ?? null),
+    [data.outageEvents, data.maintenanceEvents],
+  );
+
+  // Reliability profiles: aggregate events per asset for the selected year
+  // window. Keyed by asset id for O(1) lookup during render.
+  const reliability = useMemo(
+    () => computeReliability(data.outageEvents ?? null, data.maintenanceEvents ?? null, year),
+    [data.outageEvents, data.maintenanceEvents, year],
+  );
+  const isReliability = view === "reliability";
 
   // Escape interpolated values before they are injected into popup innerHTML.
   // Defends against malformed/markup characters in data fields now, and against
@@ -279,13 +324,23 @@ export default function GridMap({ lang, filter, onStats }: Props) {
   const gridStyle = (feature?: GeoJSON.Feature) => {
     const props = (feature?.properties ?? {}) as LineProps;
     const voltage = Number(props.voltage_kV);
+    // In reliability mode the network stays as subtle context: lines keep their
+    // true voltage colors (so HV/MV remain distinguishable) but at reduced
+    // opacity and weight, letting the node heat-map dominate.
+    const relMode = isReliability;
+    const op = relMode ? 0.3 : 1;
+    const wMul = relMode ? 0.7 : 1;
     if (voltage === 225) {
-      return isCrossBorder(props)
-        ? { color: "#A78BFA", weight: 3.5, opacity: 0.9, className: "hv-225-intl-line" }
-        : { color: "#2579fc", weight: 3.5, opacity: 0.9, className: "hv-225-line" };
+      const intl = isCrossBorder(props);
+      return {
+        color: intl ? "#A78BFA" : "#2579fc",
+        weight: 3.5 * wMul,
+        opacity: 0.9 * op,
+        className: relMode ? "" : (intl ? "hv-225-intl-line" : "hv-225-line"),
+      };
     }
-    if (voltage === 90) return { color: "#FDA206", weight: 2.2, opacity: 0.85, className: "hv-90-line" };
-    return { color: "#00F2FF", weight: 1.5, opacity: 0.7, className: "mv-line" };
+    if (voltage === 90) return { color: "#FDA206", weight: 2.2 * wMul, opacity: 0.85 * op, className: relMode ? "" : "hv-90-line" };
+    return { color: "#00F2FF", weight: 1.5 * wMul, opacity: 0.7 * op, className: relMode ? "" : "mv-line" };
   };
 
   const onEachGridFeature = (feature: GeoJSON.Feature, layer: L.Layer) => {
@@ -323,7 +378,20 @@ export default function GridMap({ lang, filter, onStats }: Props) {
   const pointToLayer = (feature: GeoJSON.Feature, latlng: L.LatLng) => {
     const p = (feature.properties ?? {}) as NodeProps;
     const isConsumer = p.demand_profile !== undefined;
-    
+
+    // RELIABILITY MODE: size + color the node by its reliability stress score.
+    // Color and size are both driven by the score (redundant channel for
+    // color-blind safety). Assets with no events render as the calm baseline.
+    if (isReliability) {
+      const profile = p.id ? reliability.profiles.get(p.id) : undefined;
+      const score = profile?.reliability_score ?? 0;
+      const color = heatColor(score);
+      const d = heatRadius(score);
+      const ring = score > 0 ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.45)";
+      const html = `<div style="background-color:${color};width:${d}px;height:${d}px;border:2px solid ${ring};border-radius:50%;box-shadow:0 0 ${Math.round(d * 0.9)}px ${color}AA;"></div>`;
+      return L.marker(latlng, { icon: L.divIcon({ className: "custom-div-icon", html, iconSize: [d, d], iconAnchor: [d / 2, d / 2] }) });
+    }
+
     let color = "#2579fc";
     if (p.fuel === "Wind") color = "#66BB6A";
     if (p.fuel === "Solar") color = "#FDA206";
@@ -342,9 +410,55 @@ export default function GridMap({ lang, filter, onStats }: Props) {
     return L.marker(latlng, { icon: L.divIcon({ className: "custom-div-icon", html: iconHtml, iconSize: [size, size], iconAnchor: [size/2, size/2] }) });
   };
 
+  // Localized reliability-profile popup for a node in reliability mode.
+  const reliabilityPopupHtml = (p: NodeProps): string => {
+    const profile = p.id ? reliability.profiles.get(p.id) : undefined;
+    const confLabel: Record<string, string> = lang === "EN"
+      ? { measured: "Measured", reported: "Reported", modeled: "Modeled" }
+      : { measured: "Mesuré", reported: "Rapporté", modeled: "Modélisé" };
+    const confColor: Record<string, string> = { measured: "#22C55E", reported: "#F59E0B", modeled: "#9DA2B3" };
+    const sevLabel = (s: string | null) => {
+      if (!s) return "—";
+      const en: Record<string, string> = { low: "Low", medium: "Medium", high: "High", critical: "Critical" };
+      const fr: Record<string, string> = { low: "Faible", medium: "Moyen", high: "Élevé", critical: "Critique" };
+      return (lang === "EN" ? en : fr)[s] ?? s;
+    };
+    const head = lang === "EN" ? "RELIABILITY PROFILE" : "PROFIL DE FIABILITÉ";
+    if (!profile) {
+      const none = lang === "EN" ? "No recorded events" : "Aucun évènement enregistré";
+      return `<div class="font-sans p-2"><div class="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-2 border-b border-white/5 pb-1">${head}</div><div class="text-sm font-bold text-[#EDEFF7]">${esc(p.name)}</div><div class="text-[11px] mt-2 text-sunu-space">${none}</div></div>`;
+    }
+    const c = profile.confidence;
+    const rows = [
+      [lang === "EN" ? "Stress score" : "Score de stress", `${profile.reliability_score}/100`],
+      [lang === "EN" ? "Events" : "Évènements", String(profile.event_count)],
+      [lang === "EN" ? "Outage hours" : "Heures de coupure", String(profile.total_outage_hours)],
+      [lang === "EN" ? "Worst severity" : "Sévérité max", sevLabel(profile.worst_severity)],
+    ];
+    const rowsHtml = rows.map(([k, v]) =>
+      `<div class="flex justify-between text-[10px]"><span class="text-sunu-graphite uppercase font-bold">${k}</span><span class="text-sunu-cloud font-mono">${esc(v)}</span></div>`
+    ).join("");
+    const badge = `<span style="background:${confColor[c]}22;color:${confColor[c]};" class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">${confLabel[c]}</span>`;
+    const scoreColor = heatColor(profile.reliability_score);
+    return `<div class="font-sans p-2">
+      <div class="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-2 border-b border-white/5 pb-1">${head}</div>
+      <div class="flex items-center justify-between"><div class="text-sm font-bold text-[#EDEFF7]">${esc(p.name)}</div><div style="width:10px;height:10px;border-radius:50%;background:${scoreColor};box-shadow:0 0 8px ${scoreColor}AA;"></div></div>
+      <div class="mt-3 space-y-1.5 border-t border-white/5 pt-2">${rowsHtml}</div>
+      <div class="mt-3 pt-2 border-t border-white/5 flex items-center justify-between"><span class="text-[9px] text-sunu-graphite uppercase font-bold">${lang === "EN" ? "Confidence" : "Confiance"}</span>${badge}</div>
+    </div>`;
+  };
+
   const onEachPlantFeature = (feature: GeoJSON.Feature, layer: L.Layer) => {
     if (feature.properties) {
       const p = feature.properties as NodeProps;
+
+      // Reliability mode: show the aggregated reliability profile instead of the
+      // infrastructure detail popup.
+      if (isReliability) {
+        layer.bindPopup(reliabilityPopupHtml(p), { className: 'custom-popup', pane: 'popupAboveAll' });
+        return;
+      }
+
       const isSub = p.fuel === "Substation";
       const isCon = p.demand_profile !== undefined;
       const label = lang === "EN" ? (isCon ? "Industrial Off-taker" : (isSub ? "Network Node" : "Power Plant")) : (isCon ? "Consommateur Industriel" : (isSub ? "Nœud du Réseau" : "Centrale Électrique"));
@@ -369,7 +483,11 @@ export default function GridMap({ lang, filter, onStats }: Props) {
   return (
     <div className="w-full h-full relative bg-[#121212]">
       <style jsx global>{`
-        .leaflet-container { background: #121212 !important; }
+        /* CARTO Dark Matter renders water as a distinct dark blue-grey and land
+           a touch lighter, so coastline and islands (e.g. Gorée) stay readable
+           without filter hacks. Background matches the theme's water tone. */
+        .leaflet-container { background: #1B2026 !important; }
+        .basemap-tiles { filter: saturate(1.05); }
         .hv-225-line { filter: drop-shadow(0 0 4px #2579fcCC); }
         .hv-225-intl-line { filter: drop-shadow(0 0 4px #A78BFACC); }
         .hv-90-line { filter: drop-shadow(0 0 3px #FDA206CC); }
@@ -382,16 +500,49 @@ export default function GridMap({ lang, filter, onStats }: Props) {
       <MapContainer center={[13.8, -13.5] as any} zoom={7} scrollWheelZoom={true} keyboard={true} zoomControl={false} zoomSnap={0.25} zoomDelta={0.5} wheelDebounceTime={40} wheelPxPerZoomLevel={100} className="w-full h-full">
         <PopupPaneSetup />
         <ZoomControl position="bottomleft" />
-        <TileLayer attribution='Tiles &copy; <a href="https://www.esri.com/">Esri</a>' url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}" />
-        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}" />
-        {processedData.grid && <GeoJSON key={`grid-${filter}`} data={processedData.grid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
-        {processedData.regionalGrid && <GeoJSON key={`reg-${filter}`} data={processedData.regionalGrid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
-        {processedData.tieLines && <GeoJSON key={`tie-${filter}`} data={processedData.tieLines} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
-        {processedData.plants && <GeoJSON data={processedData.plants} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
-        {processedData.regionalNodes && <GeoJSON data={processedData.regionalNodes} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
-        {processedData.consumers && <GeoJSON data={processedData.consumers} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
-        <EsiLayerManager data={processedData.esiSites} />
+        <LabelPaneSetup />
+        {/* CARTO Dark Matter (no labels) — clean dark base with readable water */}
+        <TileLayer className="basemap-tiles" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png" subdomains="abcd" maxZoom={20} />
+        {/* Soft national boundary — solid, thin, recessive (no longer dashed) */}
+        {senegalBorder && <GeoJSON key={`sn-border-${view}`} data={senegalBorder} style={{ color: "#5B6472", weight: 1, opacity: 0.6, fill: false } as any} interactive={false} />}
+        {/* Place labels on a high pane so they stay legible over the grid lines */}
+        <TileLayer pane="labels" url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png" subdomains="abcd" maxZoom={20} />
+        {processedData.grid && <GeoJSON key={`grid-${filter}-${view}`} data={processedData.grid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
+        {processedData.regionalGrid && <GeoJSON key={`reg-${filter}-${view}`} data={processedData.regionalGrid} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
+        {processedData.tieLines && <GeoJSON key={`tie-${filter}-${view}`} data={processedData.tieLines} filter={geoJsonFilter} style={gridStyle} onEachFeature={onEachGridFeature} />}
+        {processedData.plants && <GeoJSON key={`plants-${view}-${lang}-${year}`} data={processedData.plants} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
+        {processedData.regionalNodes && <GeoJSON key={`rnodes-${view}-${lang}-${year}`} data={processedData.regionalNodes} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
+        {processedData.consumers && <GeoJSON key={`cons-${view}-${lang}-${year}`} data={processedData.consumers} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
+        {/* ESI sites parked until real assets exist — see src/lib/config.ts */}
+        {SHOW_ESI_SITES && <EsiLayerManager data={processedData.esiSites} />}
       </MapContainer>
+
+      {/* Time slider — reliability mode only. Scrubs events by calendar year;
+          "All" aggregates the full history. Constraints (persistent) always show. */}
+      {isReliability && years.length > 0 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[2000] glass-panel rounded-xl px-4 py-3 pointer-events-auto" role="group" aria-label={lang === "EN" ? "Filter events by year" : "Filtrer les évènements par année"}>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[9px] uppercase tracking-widest font-bold text-sunu-space mr-1">{lang === "EN" ? "Period" : "Période"}</span>
+            {(["all", ...years] as YearFilter[]).map((y) => {
+              const active = year === y;
+              const label = y === "all" ? (lang === "EN" ? "All" : "Tout") : String(y);
+              return (
+                <button
+                  key={String(y)}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setYear(y)}
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
+                    active ? "bg-white/[0.12] text-sunu-cloud" : "text-sunu-space hover:text-sunu-cloud"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Loading state — shown until the grid layer has data */}
       {!loadError && !data.grid && (

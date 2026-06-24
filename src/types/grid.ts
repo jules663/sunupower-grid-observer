@@ -43,6 +43,7 @@ export interface LineProps {
 
 // --- Plant / substation / regional node properties ---
 export interface PlantProps {
+  id?: string; // stable slug id; referenced by reliability events
   name: string;
   type?: string;
   fuel?: string; // "Solar" | "Wind" | "Hydro" | "Coal" | "Thermal" | "Substation" | ...
@@ -85,7 +86,8 @@ export type LineCollection = FeatureCollection<LineGeometry, LineProps>;
 export type NodeCollection = FeatureCollection<PointGeometry, NodeProps>;
 export type EsiCollection = FeatureCollection<PointGeometry, EsiProps>;
 
-// The full data bundle loaded by GridMap.
+// The full data bundle loaded by GridMap. Event collections are populated for
+// the reliability layer (Phase 2) and may be null if not yet present.
 export interface GridData {
   grid: LineCollection | null;
   plants: NodeCollection | null;
@@ -94,4 +96,53 @@ export interface GridData {
   tieLines: LineCollection | null;
   consumers: NodeCollection | null;
   esiSites: EsiCollection | null;
+  outageEvents?: EventCollection | null;
+  maintenanceEvents?: EventCollection | null;
+}
+
+// ============================================================================
+// RELIABILITY INTELLIGENCE LAYER (Phase 1: data model)
+// ============================================================================
+
+// Confidence tier of a reliability event, mirroring the source hierarchy in the
+// design spec. The UI keeps measured/reported/modeled visually distinct so the
+// map never implies certainty it doesn't have.
+export type EventConfidence = "measured" | "reported" | "modeled";
+
+export type EventType = "outage" | "constraint" | "maintenance";
+
+export type EventSeverity = "low" | "medium" | "high" | "critical";
+
+// A single reliability event. References the affected asset by its stable id
+// (asset_ref) rather than by coordinates, so relocating a node never orphans
+// its history. The geometry is carried for direct rendering convenience and
+// should match the referenced asset.
+export interface EventProps {
+  event_id: string;
+  asset_ref: string;          // stable id of a node or line
+  asset_type: "node" | "line";
+  event_type: EventType;
+  start: string;              // ISO 8601
+  end?: string | null;        // null if ongoing/unknown
+  duration_min?: number | null;
+  cause?: string;
+  customers_affected?: number;
+  severity: EventSeverity;
+  planned?: boolean;          // true for scheduled maintenance
+  source: string;
+  confidence: EventConfidence;
+}
+
+export type EventFeature = Feature<PointGeometry, EventProps>;
+export type EventCollection = FeatureCollection<PointGeometry, EventProps>;
+
+// Aggregated per-asset reliability profile, computed at runtime from events
+// (Phase 2). Defined here so the type contract is fixed from Phase 1.
+export interface ReliabilityProfile {
+  asset_ref: string;
+  event_count: number;
+  total_outage_hours: number;
+  reliability_score: number;  // 0–100 composite; higher = less reliable / more stressed
+  worst_severity: EventSeverity | null;
+  confidence: EventConfidence; // lowest tier among contributing events
 }

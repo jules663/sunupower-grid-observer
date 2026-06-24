@@ -1,12 +1,131 @@
 {
   "type": "FeatureCollection",
   "features": [
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-11.445, 14.437] }, "properties": { "name": "Kayes Terminal", "type": "Substation", "fuel": "Substation", "capacity_mw": 0, "country": "Mali" } },
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-12.457, 14.901] }, "properties": { "name": "Bakel Terminal", "type": "Substation", "fuel": "Substation", "capacity_mw": 0, "country": "Senegal" } },
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-15.533, 13.433] }, "properties": { "name": "Soma OMVG Hub", "type": "Substation", "fuel": "Substation", "capacity_mw": 0, "country": "Gambia" } },
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-16.649, 13.271] }, "properties": { "name": "Brikama Hub", "type": "Substation", "fuel": "Substation", "capacity_mw": 0, "country": "Gambia" } },
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-15.744, 14.129] }, "properties": { "name": "Birkelane Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0, "country": "Senegal" } },
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-15.424, 12.654] }, "properties": { "name": "Tanaff Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0, "country": "Senegal" } },
-    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-15.319, 12.073] }, "properties": { "name": "Mansoa Substation", "type": "Substation", "fuel": "Substation", "capacity_mw": 0, "country": "Guinea-Bissau" } }
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -11.445,
+          14.437
+        ]
+      },
+      "properties": {
+        "name": "Kayes Terminal",
+        "type": "Substation",
+        "fuel": "Substation",
+        "capacity_mw": 0,
+        "country": "Mali",
+        "id": "kayes-terminal"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -12.457,
+          14.901
+        ]
+      },
+      "properties": {
+        "name": "Bakel Terminal",
+        "type": "Substation",
+        "fuel": "Substation",
+        "capacity_mw": 0,
+        "country": "Senegal",
+        "id": "bakel-terminal"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -15.533,
+          13.433
+        ]
+      },
+      "properties": {
+        "name": "Soma OMVG Hub",
+        "type": "Substation",
+        "fuel": "Substation",
+        "capacity_mw": 0,
+        "country": "Gambia",
+        "id": "soma-omvg-hub"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.649,
+          13.271
+        ]
+      },
+      "properties": {
+        "name": "Brikama Hub",
+        "type": "Substation",
+        "fuel": "Substation",
+        "capacity_mw": 0,
+        "country": "Gambia",
+        "id": "brikama-hub"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -15.744,
+          14.129
+        ]
+      },
+      "properties": {
+        "name": "Birkelane Substation",
+        "type": "Substation",
+        "fuel": "Substation",
+        "capacity_mw": 0,
+        "country": "Senegal",
+        "id": "birkelane-substation"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -15.424,
+          12.654
+        ]
+      },
+      "properties": {
+        "name": "Tanaff Substation",
+        "type": "Substation",
+        "fuel": "Substation",
+        "capacity_mw": 0,
+        "country": "Senegal",
+        "id": "tanaff-substation"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -15.319,
+          12.073
+        ]
+      },
+      "properties": {
+        "name": "Mansoa Substation",
+        "type": "Substation",
+        "fuel": "Substation",
+        "capacity_mw": 0,
+        "country": "Guinea-Bissau",
+        "id": "mansoa-substation"
+      }
+    }
   ]
 }

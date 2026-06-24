@@ -14,8 +14,20 @@ const DATA_DIR = join(__dirname, "..", "public", "data");
 const BBOX = { lonMin: -17.7, lonMax: -10.5, latMin: 11.5, latMax: 17.0 };
 
 // Which files are loaded and rendered by the app (others may exist unused).
+// NOTE: sunupower-esi-sites.json is intentionally NOT served — the ESI layer is
+// parked (simulated data). It lives in ../../_archive/parked-data/ and is added
+// back here when real ESI sites are published. See src/lib/config.ts.
 const LINE_FILES = ["senegal-grid.json", "regional-interconnections.json", "infrastructure-tie-lines.json"];
-const POINT_FILES = ["senegal-plants.json", "regional-nodes.json", "industrial-consumers.json", "sunupower-esi-sites.json"];
+const POINT_FILES = ["senegal-plants.json", "regional-nodes.json", "industrial-consumers.json"];
+// Reliability-layer event files (Phase 1).
+const EVENT_FILES = ["outage-events.json", "maintenance-events.json"];
+
+// Files whose point features carry stable asset ids that events may reference.
+const ID_FILES = ["senegal-plants.json", "regional-nodes.json", "industrial-consumers.json"];
+
+const VALID_CONFIDENCE = new Set(["measured", "reported", "modeled"]);
+const VALID_EVENT_TYPE = new Set(["outage", "constraint", "maintenance"]);
+const VALID_SEVERITY = new Set(["low", "medium", "high", "critical"]);
 
 let errors = 0;
 let warnings = 0;
@@ -71,6 +83,53 @@ function checkCollection(file, fc, kind) {
 console.log("Validating GeoJSON data files…");
 for (const file of LINE_FILES) checkCollection(file, load(file), "line");
 for (const file of POINT_FILES) checkCollection(file, load(file), "point");
+
+// --- Reliability events (Phase 1) ---
+// Collect the set of known asset ids so event asset_refs can be resolved.
+const knownIds = new Set();
+for (const file of ID_FILES) {
+  const fc = load(file);
+  for (const f of fc?.features ?? []) {
+    if (f.properties?.id) knownIds.add(f.properties.id);
+  }
+}
+
+function checkEvents(file, fc) {
+  if (!fc) { console.log(`\n${file} — not present (skipped)`); return; }
+  if (fc.type !== "FeatureCollection" || !Array.isArray(fc.features)) { err(`${file}: not a FeatureCollection`); return; }
+  console.log(`\n${file} — ${fc.features.length} events`);
+  const ids = new Set();
+  fc.features.forEach((f, i) => {
+    const p = f.properties ?? {};
+    if (!p.event_id) err(`${file}[${i}]: missing event_id`);
+    else if (ids.has(p.event_id)) err(`${file}[${i}]: duplicate event_id "${p.event_id}"`);
+    else ids.add(p.event_id);
+
+    if (!p.asset_ref) err(`${file}[${i}]: missing asset_ref`);
+    else if (!knownIds.has(p.asset_ref)) err(`${file}[${i}]: asset_ref "${p.asset_ref}" does not resolve to a known asset id`);
+
+    if (!VALID_EVENT_TYPE.has(p.event_type)) err(`${file}[${i}]: invalid event_type "${p.event_type}"`);
+    if (!VALID_SEVERITY.has(p.severity)) err(`${file}[${i}]: invalid severity "${p.severity}"`);
+    if (!VALID_CONFIDENCE.has(p.confidence)) err(`${file}[${i}]: invalid confidence "${p.confidence}"`);
+    if (!p.source) warn(`${file}[${i}]: no source given`);
+
+    // Date sanity
+    const start = Date.parse(p.start);
+    if (isNaN(start)) err(`${file}[${i}]: start "${p.start}" is not a valid ISO date`);
+    if (p.end != null) {
+      const end = Date.parse(p.end);
+      if (isNaN(end)) err(`${file}[${i}]: end "${p.end}" is not a valid ISO date`);
+      else if (!isNaN(start) && end < start) err(`${file}[${i}]: end is before start`);
+    }
+
+    // Geometry should match the referenced asset location (Point in bbox)
+    const g = f.geometry;
+    if (g?.type !== "Point") err(`${file}[${i}]: event geometry must be a Point`);
+    else if (!inBbox(g.coordinates[0], g.coordinates[1])) warn(`${file}[${i}]: event point outside region bbox`);
+  });
+}
+
+for (const file of EVENT_FILES) checkEvents(file, load(file));
 
 console.log(`\n${errors === 0 ? "✓" : "✗"} Done — ${errors} error(s), ${warnings} warning(s).`);
 process.exit(errors > 0 ? 1 : 0);

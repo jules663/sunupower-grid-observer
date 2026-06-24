@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, Shield } from "lucide-react";
+import { SHOW_ESI_SITES } from "@/lib/config";
 
 // Shared shape of the localized strings the panels need. page.tsx builds the
 // full translation object; these components consume the subset they use.
@@ -20,6 +21,17 @@ export interface PanelStrings {
   senelec225: string;
   omvg225: string;
   esiSite: string;
+  // Reliability mode
+  reliabilityTitle: string;
+  relScale: string;
+  relLow: string;
+  relHigh: string;
+  relBaseline: string;
+  confidenceTitle: string;
+  confMeasured: string;
+  confReported: string;
+  confModeled: string;
+  relLegalNote: string;
 }
 
 // A single fuel/asset legend swatch. Shape is "dot" | "hex" | "diamond".
@@ -81,7 +93,8 @@ export function Legend({ t }: { t: PanelStrings }) {
     { color: "#42A5F5", label: t.hydro },
     { color: "#E91E63", label: t.industrial, shape: "hex" },
     { color: "#6E7180", label: t.substation, small: true },
-    { color: "#F59E0B", label: t.esiSite, shape: "diamond" },
+    // ESI swatch shown only when the ESI layer is enabled (parked for now).
+    ...(SHOW_ESI_SITES ? [{ color: "#F59E0B", label: t.esiSite, shape: "diamond" as const }] : []),
   ];
   return (
     <section aria-label={t.fuelTitle}>
@@ -104,6 +117,43 @@ export function Legend({ t }: { t: PanelStrings }) {
             <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{f.label}</span>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+// Legend for reliability mode: the stress-score heat scale + the data-confidence
+// key, so a measured outage and a modeled constraint are never read as equal.
+export function ReliabilityLegend({ t }: { t: PanelStrings }) {
+  const confidences: { label: string; color: string }[] = [
+    { label: t.confMeasured, color: "#22C55E" },
+    { label: t.confReported, color: "#F59E0B" },
+    { label: t.confModeled, color: "#9DA2B3" },
+  ];
+  return (
+    <section aria-label={t.reliabilityTitle}>
+      <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space mb-3 px-1 border-b border-white/5 pb-3">{t.relScale}</div>
+      <div className="px-1 mb-4">
+        <div className="h-2.5 rounded-full" style={{ background: "linear-gradient(90deg,#3B82F6 0%,#FACC15 28%,#F59E0B 52%,#F97316 76%,#EF4444 100%)" }} aria-hidden="true" />
+        <div className="flex justify-between mt-1.5">
+          <span className="text-[9px] uppercase tracking-wider font-bold text-sunu-space">{t.relLow}</span>
+          <span className="text-[9px] uppercase tracking-wider font-bold text-sunu-space">{t.relHigh}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#3B82F6] border border-white/20" aria-hidden="true" />
+          <span className="text-[10px] uppercase tracking-wider font-bold text-sunu-space">{t.relBaseline}</span>
+        </div>
+      </div>
+      <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space mb-3 px-1 border-b border-white/5 pb-3">{t.confidenceTitle}</div>
+      <div className="flex flex-col gap-2 mb-3">
+        {confidences.map((c) => (
+          <div key={c.label} className="flex items-center gap-3">
+            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase" style={{ background: `${c.color}22`, color: c.color }}>{c.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="border-t border-white/5 pt-3">
+        <span className="text-[10px] text-sunu-space leading-relaxed italic">{t.relLegalNote}</span>
       </div>
     </section>
   );

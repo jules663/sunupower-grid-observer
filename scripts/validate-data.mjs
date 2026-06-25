@@ -113,6 +113,12 @@ function checkEvents(file, fc) {
     if (!VALID_CONFIDENCE.has(p.confidence)) err(`${file}[${i}]: invalid confidence "${p.confidence}"`);
     if (!p.source) warn(`${file}[${i}]: no source given`);
 
+    // System indices (Phase 4): if present, must be sane and carry a scope so
+    // they're never read as node-level measurements.
+    if (p.saifi != null && (typeof p.saifi !== "number" || p.saifi < 0)) err(`${file}[${i}]: saifi must be a non-negative number`);
+    if (p.saidi_min != null && (typeof p.saidi_min !== "number" || p.saidi_min < 0)) err(`${file}[${i}]: saidi_min must be a non-negative number (minutes)`);
+    if ((p.saifi != null || p.saidi_min != null) && !p.scope) warn(`${file}[${i}]: SAIFI/SAIDI present without a 'scope' — should state the aggregate area`);
+
     // Date sanity
     const start = Date.parse(p.start);
     if (isNaN(start)) err(`${file}[${i}]: start "${p.start}" is not a valid ISO date`);

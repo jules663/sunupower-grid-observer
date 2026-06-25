@@ -227,6 +227,22 @@ export default function GridMap({ lang, filter, view, onStats }: Props) {
   );
   const isReliability = view === "reliability";
 
+  // Latest SAIFI/SAIDI system indicator per asset (Phase 4) — for surfacing the
+  // raw measured indices in popups. Keyed by asset_ref, keeping the most recent
+  // period's values among events that carry them.
+  const indexByAsset = useMemo(() => {
+    const m = new Map<string, { saifi?: number; saidi_min?: number; scope?: string; period?: string; start: string }>();
+    (data.outageEvents?.features ?? []).forEach((f) => {
+      const p = f.properties;
+      if (p.saifi == null && p.saidi_min == null) return;
+      const prev = m.get(p.asset_ref);
+      if (!prev || Date.parse(p.start) > Date.parse(prev.start)) {
+        m.set(p.asset_ref, { saifi: p.saifi, saidi_min: p.saidi_min, scope: p.scope, period: p.period, start: p.start });
+      }
+    });
+    return m;
+  }, [data.outageEvents]);
+
   // Escape interpolated values before they are injected into popup innerHTML.
   // Defends against malformed/markup characters in data fields now, and against
   // stored-XSS if any dataset later becomes user-supplied or API-sourced.
@@ -440,10 +456,32 @@ export default function GridMap({ lang, filter, view, onStats }: Props) {
     ).join("");
     const badge = `<span style="background:${confColor[c]}22;color:${confColor[c]};" class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">${confLabel[c]}</span>`;
     const scoreColor = heatColor(profile.reliability_score);
+
+    // SENELEC SAIFI/SAIDI block — shown only when the asset carries measured
+    // system indices. Clearly labeled with its system-level scope and period so
+    // it never reads as a node-specific measurement.
+    const idx = p.id ? indexByAsset.get(p.id) : undefined;
+    let indexHtml = "";
+    if (idx && (idx.saifi != null || idx.saidi_min != null)) {
+      const saidiTxt = idx.saidi_min != null
+        ? `${Math.floor(idx.saidi_min / 60)}h${String(Math.round(idx.saidi_min % 60)).padStart(2, "0")}`
+        : "—";
+      const scopeLabel = lang === "EN" ? "System indicator" : "Indicateur système";
+      const scopeTxt = `${esc(idx.scope ?? "")}${idx.period ? " · " + esc(idx.period) : ""}`;
+      indexHtml = `
+        <div class="mt-3 pt-2 border-t border-white/5">
+          <div class="text-[9px] uppercase tracking-widest font-bold text-sunu-graphite mb-1.5">${scopeLabel}</div>
+          <div class="flex justify-between text-[10px]"><span class="text-sunu-graphite uppercase font-bold">SAIFI</span><span class="text-sunu-cloud font-mono">${idx.saifi != null ? esc(idx.saifi) : "—"}</span></div>
+          <div class="flex justify-between text-[10px]"><span class="text-sunu-graphite uppercase font-bold">SAIDI</span><span class="text-sunu-cloud font-mono">${saidiTxt}</span></div>
+          <div class="text-[9px] text-sunu-space mt-1.5 italic">${scopeTxt}</div>
+        </div>`;
+    }
+
     return `<div class="font-sans p-2">
       <div class="text-[10px] uppercase tracking-widest font-bold text-sunu-graphite mb-2 border-b border-white/5 pb-1">${head}</div>
       <div class="flex items-center justify-between"><div class="text-sm font-bold text-[#EDEFF7]">${esc(p.name)}</div><div style="width:10px;height:10px;border-radius:50%;background:${scoreColor};box-shadow:0 0 8px ${scoreColor}AA;"></div></div>
       <div class="mt-3 space-y-1.5 border-t border-white/5 pt-2">${rowsHtml}</div>
+      ${indexHtml}
       <div class="mt-3 pt-2 border-t border-white/5 flex items-center justify-between"><span class="text-[9px] text-sunu-graphite uppercase font-bold">${lang === "EN" ? "Confidence" : "Confiance"}</span>${badge}</div>
     </div>`;
   };
@@ -488,6 +526,36 @@ export default function GridMap({ lang, filter, view, onStats }: Props) {
            without filter hacks. Background matches the theme's water tone. */
         .leaflet-container { background: #1B2026 !important; }
         .basemap-tiles { filter: saturate(1.05); }
+        /* Glass-panel zoom control to match the app's dark frosted aesthetic
+           (overrides Leaflet's default white buttons). */
+        .leaflet-control-zoom {
+          border: 1px solid rgba(255,255,255,0.10) !important;
+          border-radius: 12px !important;
+          overflow: hidden !important;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07) !important;
+          backdrop-filter: blur(14px) saturate(160%) brightness(0.96);
+          -webkit-backdrop-filter: blur(14px) saturate(160%) brightness(0.96);
+        }
+        .leaflet-control-zoom a {
+          background: rgba(14,14,18,0.48) !important;
+          color: #EDEFF7 !important;
+          border: none !important;
+          border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+          width: 32px !important;
+          height: 32px !important;
+          line-height: 30px !important;
+          font-size: 17px !important;
+          transition: background 0.15s ease, color 0.15s ease;
+        }
+        .leaflet-control-zoom a:last-child { border-bottom: none !important; }
+        .leaflet-control-zoom a:hover {
+          background: rgba(255,255,255,0.10) !important;
+          color: #FFFFFF !important;
+        }
+        .leaflet-control-zoom a.leaflet-disabled {
+          background: rgba(14,14,18,0.40) !important;
+          color: rgba(157,162,179,0.45) !important;
+        }
         .hv-225-line { filter: drop-shadow(0 0 4px #2579fcCC); }
         .hv-225-intl-line { filter: drop-shadow(0 0 4px #A78BFACC); }
         .hv-90-line { filter: drop-shadow(0 0 3px #FDA206CC); }

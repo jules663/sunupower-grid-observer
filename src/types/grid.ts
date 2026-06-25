@@ -131,6 +131,16 @@ export interface EventProps {
   planned?: boolean;          // true for scheduled maintenance
   source: string;
   confidence: EventConfidence;
+
+  // --- System reliability indices (Phase 4) ---
+  // Populated for measured utility indicators (e.g. SENELEC SAIFI/SAIDI). These
+  // are aggregate, system-level figures, NOT per-node measurements — `scope`
+  // records the area they describe (e.g. "Dakar system") so the UI never
+  // implies node-level precision the source doesn't provide.
+  saifi?: number;             // System Average Interruption Frequency Index
+  saidi_min?: number;         // System Average Interruption Duration Index, minutes
+  scope?: string;             // geographic scope of the index (e.g. "Dakar system")
+  period?: string;            // reporting period label (e.g. "2024 H2", "2024 annual")
 }
 
 export type EventFeature = Feature<PointGeometry, EventProps>;

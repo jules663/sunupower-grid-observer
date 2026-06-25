@@ -43,7 +43,12 @@ function eventStress(p: EventProps): number {
   if (p.event_type === "maintenance") return sev * 0.5 + hours * 0.1;
   // outage: severity plus a duration term (diminishing) so a long critical
   // outage scores high but duration doesn't run away.
-  return sev * 2 + Math.min(hours, 48) * 0.5;
+  let stress = sev * 2 + Math.min(hours, 48) * 0.5;
+  // SAIFI (interruption frequency) adds a frequency term for measured system
+  // indicators, so a high outage-count period registers even if each outage is
+  // short. Capped so it complements rather than dominates.
+  if (p.saifi != null) stress += Math.min(p.saifi, 12) * 0.6;
+  return stress;
 }
 
 export interface ReliabilityResult {

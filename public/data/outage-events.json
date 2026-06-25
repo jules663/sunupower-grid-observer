@@ -304,6 +304,87 @@
         "source": "Modeled (topology: load proxy)",
         "confidence": "modeled"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "sen-2024-h1",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2024-01-01T00:00:00Z",
+        "end": "2024-06-30T23:59:00Z",
+        "duration_min": 178,
+        "cause": "SENELEC Dakar system reliability indicator (SAIFI/SAIDI)",
+        "severity": "medium",
+        "saifi": 3.82,
+        "saidi_min": 178,
+        "scope": "Dakar system",
+        "period": "2024 H1",
+        "source": "SENELEC (senelec.sn/saifisaidi)",
+        "confidence": "measured"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "sen-2024-h2",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2024-07-01T00:00:00Z",
+        "end": "2024-12-31T23:59:00Z",
+        "duration_min": 222,
+        "cause": "SENELEC Dakar system reliability indicator (SAIFI/SAIDI)",
+        "severity": "high",
+        "saifi": 5.3,
+        "saidi_min": 222,
+        "scope": "Dakar system",
+        "period": "2024 H2",
+        "source": "SENELEC (senelec.sn/saifisaidi)",
+        "confidence": "measured"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "sen-2025-h1",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2025-01-01T00:00:00Z",
+        "end": "2025-06-30T23:59:00Z",
+        "duration_min": 159,
+        "cause": "SENELEC Dakar system reliability indicator (SAIFI/SAIDI)",
+        "severity": "medium",
+        "saifi": 4.08,
+        "saidi_min": 159,
+        "scope": "Dakar system",
+        "period": "2025 H1",
+        "source": "SENELEC (senelec.sn/saifisaidi)",
+        "confidence": "measured"
+      }
     }
   ]
 }

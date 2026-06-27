@@ -29,3 +29,41 @@ body {
     0 8px 32px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
 }
+
+/* Horizontal scroll for the year slider on narrow viewports without a visible
+   scrollbar (the row scrolls if the year ticks overflow). */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Leaflet attribution: on mobile it defaults to the bottom-right corner where it
+   collides with the LEGEND button. Pin it to the bottom-LEFT-center as a thin
+   strip below the control row so nothing overlaps; restore the default
+   bottom-right corner on desktop where there is no mobile control row. */
+.leaflet-bottom.leaflet-right {
+  bottom: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+}
+@media (min-width: 1024px) {
+  .leaflet-bottom.leaflet-right {
+    left: auto;
+    display: block;
+  }
+}
+.leaflet-control-attribution {
+  background: rgba(14, 14, 18, 0.55) !important;
+  color: #9DA2B3 !important;
+  font-size: 9px !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.leaflet-control-attribution a {
+  color: #BCBFCC !important;
+}

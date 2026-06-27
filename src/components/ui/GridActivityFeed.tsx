@@ -164,7 +164,7 @@ function FeedSection({
 
   return (
     <section className="mb-6" aria-label={title}>
-      <div className="flex items-center gap-2 mb-3 sticky top-0 z-10 py-1.5" style={{ background: "rgba(14,14,18,0.55)", backdropFilter: "blur(6px)" }}>
+      <div className="flex items-center gap-2 mb-3 sticky top-0 z-10 pt-3 pb-2 -mx-5 px-5" style={{ background: "rgba(19,19,26,0.82)", backdropFilter: "blur(16px) saturate(160%)", WebkitBackdropFilter: "blur(16px) saturate(160%)" }}>
         <span style={{ color: accent }} aria-hidden="true">{icon}</span>
         <h3 className="text-[11px] uppercase tracking-[0.18em] font-bold text-sunu-cloud">{title}</h3>
         <span className="text-[10px] font-mono text-sunu-graphite ml-auto">{events.length}</span>
@@ -336,7 +336,7 @@ export function GridActivityFeed({
         </div>
 
         {/* Scrollable feed */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 min-h-0">
+        <div className="flex-1 overflow-y-auto px-5 pt-0 pb-4 min-h-0">
           {empty ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
               <CalendarClock className="w-8 h-8 text-sunu-graphite/50 mb-3" aria-hidden="true" />

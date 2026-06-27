@@ -6,7 +6,6 @@ import Image from "next/image";
 import { Globe, Info, Layers, CalendarClock } from "lucide-react";
 import type { GridStats } from "@/components/map/GridMap";
 import { ContextPanel, Legend, ReliabilityLegend } from "@/components/ui/panels";
-import { FilterControls } from "@/components/ui/FilterControls";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { GridActivityFeed, type FeedStrings } from "@/components/ui/GridActivityFeed";
 
@@ -210,19 +209,15 @@ export default function Home() {
       </a>
 
       {/* Header Trace - Canonical Branding with Interactive Filters */}
-      <header className="h-[72px] border-b border-white/[0.08] flex items-center justify-between px-8 z-[2000]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col">
-            <span className="text-sm uppercase tracking-[0.3em] font-bold text-sunu-cloud leading-tight">{t.title}</span>
-            <span className="text-[11px] uppercase tracking-[0.2em] text-sunu-space font-bold">{t.subtitle}</span>
+      <header className="h-[72px] border-b border-white/[0.08] flex items-center justify-between px-4 sm:px-8 z-[2000] gap-3" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
+        <div className="flex items-center gap-6 min-w-0">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] font-bold text-sunu-cloud leading-tight truncate">{t.title}</span>
+            <span className="hidden sm:block text-[11px] uppercase tracking-[0.2em] text-sunu-space font-bold truncate">{t.subtitle}</span>
           </div>
         </div>
 
-        <div className="hidden lg:flex items-center gap-10" role="group" aria-label={t.fuelTitle}>
-          <FilterControls t={t} filter={filter} setFilter={setFilter} variant="desktop" />
-        </div>
-
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-2.5 sm:gap-5 shrink-0">
           <div className="hidden md:block">
             <ViewToggle t={t} view={view} setView={setView} />
           </div>
@@ -250,20 +245,19 @@ export default function Home() {
             <span className="text-[11px] font-bold text-sunu-cloud">{lang}</span>
           </button>
 
-          <div className="hover:opacity-100 transition-opacity">
-            <Image src="/brand/logo-light-text.png" alt="SunuPower" width={130} height={26} className="object-contain opacity-90" />
+          {/* Logo: original asset, unaltered. Sized up for visibility only.
+              No backing plate, no recolor, gold accent bar untouched. */}
+          <div className="flex items-center shrink-0">
+            <Image src="/brand/logo-light-text.png" alt="SunuPower" width={180} height={36} priority className="object-contain h-6 sm:h-7 w-auto" />
           </div>
         </div>
       </header>
 
-      {/* Mobile filter strip — visible below lg, hidden on desktop */}
-      <div className="lg:hidden shrink-0 flex flex-col gap-3 px-6 py-3 border-b border-white/[0.08]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
-        <div className="flex justify-center md:hidden">
-          <ViewToggle t={t} view={view} setView={setView} />
-        </div>
-        <div className="flex items-center justify-around" role="group" aria-label={t.fuelTitle}>
-          <FilterControls t={t} filter={filter} setFilter={setFilter} variant="mobile" />
-        </div>
+      {/* Mobile view toggle strip — only on small screens (header holds the
+          toggle at md+). The voltage filter now lives in the interactive legend
+          (Infrastructure view), so it is no longer in the header or this strip. */}
+      <div className="md:hidden shrink-0 flex justify-center px-6 py-3 border-b border-white/[0.08]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
+        <ViewToggle t={t} view={view} setView={setView} />
       </div>
 
       {/* Main Map Content */}
@@ -297,11 +291,12 @@ export default function Home() {
 
         {/* Legend Overlay — desktop only */}
         <div className="hidden lg:block absolute bottom-12 right-8 z-[2000] p-6 glass-panel rounded-xl text-left pointer-events-auto w-[280px]">
-          {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} />}
+          {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} filter={filter} setFilter={setFilter} />}
         </div>
 
-        {/* Mobile panel toggle buttons — bottom-left (Info) and bottom-right (Legend) */}
-        <div className="lg:hidden absolute bottom-6 left-0 right-0 z-[2000] flex justify-between px-6 pointer-events-none">
+        {/* Mobile panel toggle buttons — bottom-left (Info) and bottom-right (Legend).
+            Sits above the centered attribution strip; the year slider sits above this. */}
+        <div className="lg:hidden absolute bottom-9 left-0 right-0 z-[2000] flex justify-between px-6 pointer-events-none">
           <button
             type="button"
             aria-expanded={mobilePanel === "context"}
@@ -344,7 +339,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="px-6 pb-8">
-                  {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} />}
+                  {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} filter={filter} setFilter={setFilter} />}
                 </div>
               )}
             </div>

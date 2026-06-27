@@ -629,9 +629,9 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
       {/* Time slider — reliability mode only. Scrubs events by calendar year;
           "All" aggregates the full history. Constraints (persistent) always show. */}
       {isReliability && years.length > 0 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[2000] glass-panel rounded-xl px-4 py-3 pointer-events-auto" role="group" aria-label={lang === "EN" ? "Filter events by year" : "Filtrer les évènements par année"}>
-          <div className="flex items-center gap-2.5">
-            <span className="text-[9px] uppercase tracking-widest font-bold text-sunu-space mr-1">{lang === "EN" ? "Period" : "Période"}</span>
+        <div className="absolute bottom-28 lg:bottom-6 left-1/2 -translate-x-1/2 z-[2000] glass-panel rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 pointer-events-auto max-w-[calc(100vw-2rem)]" role="group" aria-label={lang === "EN" ? "Filter events by year" : "Filtrer les évènements par année"}>
+          <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar">
+            <span className="text-[9px] uppercase tracking-widest font-bold text-sunu-space mr-1 shrink-0">{lang === "EN" ? "Period" : "Période"}</span>
             {(["all", ...years] as YearFilter[]).map((y) => {
               const active = year === y;
               const label = y === "all" ? (lang === "EN" ? "All" : "Tout") : String(y);
@@ -641,7 +641,7 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
                   type="button"
                   aria-pressed={active}
                   onClick={() => setYear(y)}
-                  className={`text-[11px] font-bold px-2.5 py-1 rounded-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
+                  className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
                     active ? "bg-white/[0.12] text-sunu-cloud" : "text-sunu-space hover:text-sunu-cloud"
                   }`}
                 >

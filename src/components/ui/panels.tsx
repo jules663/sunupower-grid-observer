@@ -2,6 +2,7 @@
 
 import { Activity, Shield } from "lucide-react";
 import { SHOW_ESI_SITES } from "@/lib/config";
+import type { GridFilter } from "@/app/page";
 
 // Shared shape of the localized strings the panels need. page.tsx builds the
 // full translation object; these components consume the subset they use.
@@ -21,6 +22,10 @@ export interface PanelStrings {
   senelec225: string;
   omvg225: string;
   esiSite: string;
+  // Voltage filter labels (interactive legend, Infrastructure view)
+  backbone: string;
+  subBackbone: string;
+  mv: string;
   // Reliability mode
   reliabilityTitle: string;
   relScale: string;
@@ -83,8 +88,20 @@ export function ContextPanel({ t, kmDisplay, nodeDisplay, loading }: { t: PanelS
   );
 }
 
-// The legend: HV network line styles + fuel/asset swatches.
-export function Legend({ t }: { t: PanelStrings }) {
+// Interactive voltage-filter rows for the legend (Infrastructure view). Clicking
+// a row sets the single active filter; clicking the active row clears back to ALL
+// (same single-select model the header used to host). Line color matches the map.
+const VOLTAGE_ROWS: { value: Exclude<GridFilter, "ALL">; labelKey: keyof PanelStrings; color: string }[] = [
+  { value: "225", labelKey: "backbone", color: "#2579fc" },
+  { value: "90", labelKey: "subBackbone", color: "#FDA206" },
+  { value: "MV", labelKey: "mv", color: "#00F2FF" },
+];
+
+// The legend: an interactive HV/MV voltage filter + fuel/asset swatches.
+// `filter`/`setFilter` make the voltage rows clickable; when omitted the rows
+// render as static reference (used if the legend is ever shown read-only).
+export function Legend({ t, filter, setFilter }: { t: PanelStrings; filter?: GridFilter; setFilter?: (f: GridFilter) => void }) {
+  const interactive = !!setFilter;
   const fuels: { color: string; label: string; shape?: "dot" | "hex" | "diamond"; small?: boolean }[] = [
     { color: "#2579fc", label: t.thermal },
     { color: "#FDA206", label: t.solar },
@@ -98,15 +115,42 @@ export function Legend({ t }: { t: PanelStrings }) {
   ];
   return (
     <section aria-label={t.fuelTitle}>
-      <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space mb-3 px-1 border-b border-white/5 pb-3">HV Networks</div>
-      <div className="flex flex-col gap-2.5 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-[2.5px] rounded-full bg-sunu-blue shadow-[0_0_6px_rgba(37,121,252,0.7)]" aria-hidden="true" />
-          <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.senelec225}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-[2.5px] rounded-full bg-[#A78BFA] shadow-[0_0_6px_rgba(167,139,250,0.7)]" aria-hidden="true" />
-          <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-cloud">{t.omvg225}</span>
+      <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space mb-3 px-1 border-b border-white/5 pb-3">Networks</div>
+      <div className="flex flex-col gap-1 mb-4" role={interactive ? "group" : undefined} aria-label={interactive ? t.fuelTitle : undefined}>
+        {VOLTAGE_ROWS.map((row) => {
+          const label = t[row.labelKey];
+          const active = filter === row.value;
+          const dimmed = interactive && filter !== "ALL" && !active;
+          const content = (
+            <>
+              <div
+                className="w-5 h-[2.5px] rounded-full shrink-0 transition-all"
+                style={{ backgroundColor: row.color, boxShadow: `0 0 ${active ? 8 : 6}px ${row.color}${active ? "" : "B3"}` }}
+                aria-hidden="true"
+              />
+              <span className={`text-[11px] uppercase tracking-wider font-bold transition-colors ${active ? "" : "text-sunu-cloud"}`} style={active ? { color: row.color } : undefined}>{label}</span>
+            </>
+          );
+          return interactive ? (
+            <button
+              key={row.value}
+              type="button"
+              aria-pressed={active}
+              aria-label={label}
+              onClick={() => setFilter!(active ? "ALL" : row.value)}
+              className={`flex items-center gap-3 py-1 rounded transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${dimmed ? "opacity-35 hover:opacity-70" : "opacity-100"}`}
+            >
+              {content}
+            </button>
+          ) : (
+            <div key={row.value} className="flex items-center gap-3 py-1">{content}</div>
+          );
+        })}
+        {/* OMVG cross-border is 225kV too — shown as a reference line, not a filter.
+            Dimmed to read as a key, not an inactive control. */}
+        <div className="flex items-center gap-3 py-1 opacity-60">
+          <div className="w-5 h-[2.5px] rounded-full bg-[#A78BFA] shadow-[0_0_6px_rgba(167,139,250,0.7)] shrink-0" aria-hidden="true" />
+          <span className="text-[11px] uppercase tracking-wider font-bold text-sunu-space">{t.omvg225}</span>
         </div>
       </div>
       <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space mb-5 px-1 border-b border-white/5 pb-3">{t.fuelTitle}</div>

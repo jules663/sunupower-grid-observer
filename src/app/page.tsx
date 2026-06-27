@@ -24,9 +24,10 @@ export default function Home() {
   const [mobilePanel, setMobilePanel] = useState<null | "context" | "legend">(null);
   const [stats, setStats] = useState<GridStats | null>(null);
   const [feedOpen, setFeedOpen] = useState(false);
-  // Time-slider year, lifted from GridMap so the activity feed shares the scope.
-  const [year, setYear] = useState<number | "all">("all");
-  const handleYearChange = useCallback((y: number | "all") => setYear(y), []);
+  // The activity feed runs on its own Ahead/Current/Past time axis (relative to
+  // now) and is intentionally decoupled from the map's year slider — the slider
+  // filters the map heat by calendar year, a different time model. Coupling the
+  // two made past-year events appear under "Current", which was misleading.
   // Feed card → map focus: the asset to pan to, with a nonce so clicking the same
   // card again re-triggers the focus animation.
   const [focusAsset, setFocusAsset] = useState<string | null>(null);
@@ -272,16 +273,17 @@ export default function Home() {
           filter={filter}
           view={view}
           onStats={handleStats}
-          onYearChange={handleYearChange}
           focusAsset={focusAsset}
           focusNonce={focusNonce}
         />
 
-        {/* Grid Activity Feed — toggleable right panel (maintenance-led, all sizes) */}
+        {/* Grid Activity Feed — toggleable right panel (maintenance-led, all sizes).
+            year="all" by design: the feed's time axis is Ahead/Current/Past, not
+            the map's calendar-year slider. */}
         <GridActivityFeed
           open={feedOpen}
           onClose={() => setFeedOpen(false)}
-          year={year}
+          year="all"
           strings={feedStrings}
           onFocusAsset={handleFocusAsset}
         />

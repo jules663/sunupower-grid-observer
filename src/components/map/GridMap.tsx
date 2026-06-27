@@ -169,15 +169,13 @@ interface Props {
     filter: GridFilter;
     view: ViewMode;
     onStats?: (stats: GridStats) => void;
-    // Lifts the time-slider year up to the page so the activity feed can share it.
-    onYearChange?: (year: YearFilter) => void;
     // Asset to pan to + highlight (set when a feed card is clicked). The nonce
     // changes on every click so re-selecting the same asset re-triggers the focus.
     focusAsset?: string | null;
     focusNonce?: number;
 }
 
-export default function GridMap({ lang, filter, view, onStats, onYearChange, focusAsset, focusNonce }: Props) {
+export default function GridMap({ lang, filter, view, onStats, focusAsset, focusNonce }: Props) {
   const [data, setData] = useState<GridData>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null, esiSites: null, outageEvents: null, maintenanceEvents: null });
   const [loadError, setLoadError] = useState<boolean>(false);
   const [senegalBorder, setSenegalBorder] = useState<GeoJSON.Feature | null>(null);
@@ -251,9 +249,6 @@ export default function GridMap({ lang, filter, view, onStats, onYearChange, foc
     () => availableYears(data.outageEvents ?? null, data.maintenanceEvents ?? null),
     [data.outageEvents, data.maintenanceEvents],
   );
-  // Mirror the year up to the page (activity feed shares the same scope).
-  useEffect(() => { onYearChange?.(year); }, [year, onYearChange]);
-
   // Registry of node markers by stable asset id, populated as markers are built
   // in pointToLayer. Used by MapFocusController to pan + open a popup when a feed
   // card is clicked. Rebuilt whenever the GeoJSON layers re-render (view/lang/year

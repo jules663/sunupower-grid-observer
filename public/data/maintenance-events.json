@@ -120,6 +120,78 @@
         "source": "Reported",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0006",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-06-26T06:00:00Z",
+        "end": "2026-06-26T16:00:00Z",
+        "duration_min": 600,
+        "cause": "Peninsula feeder reconfiguration (planned)",
+        "severity": "medium",
+        "planned": true,
+        "source": "Reported (sector schedule)",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.45,
+          15.05
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0007",
+        "asset_ref": "thies-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-07-04T06:00:00Z",
+        "end": "2026-07-04T13:00:00Z",
+        "duration_min": 420,
+        "cause": "Scheduled protection relay testing (planned)",
+        "severity": "low",
+        "planned": true,
+        "source": "Reported (sector schedule)",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.03,
+          14.15
+        ]
+      },
+      "properties": {
+        "event_id": "mnt-0008",
+        "asset_ref": "kaolack-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-07-18T05:30:00Z",
+        "end": "2026-07-18T12:30:00Z",
+        "duration_min": 420,
+        "cause": "Transformer cooling-system overhaul (planned)",
+        "severity": "medium",
+        "planned": true,
+        "source": "Reported (sector schedule)",
+        "confidence": "reported"
+      }
     }
   ]
 }

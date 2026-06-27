@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, GeoJSON, ZoomControl, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -61,6 +61,33 @@ function LabelPaneSetup() {
       pane.style.pointerEvents = 'none';
     }
   }, [map]);
+  return null;
+}
+
+// Pans the map to a node marker and opens its popup when a feed card is clicked.
+// Keyed off `nonce` so re-selecting the same asset re-triggers the focus. Markers
+// are looked up in the shared registry populated by pointToLayer; if the asset
+// has no marker yet (layers mid-remount), the effect is a no-op and the next
+// click will find it.
+function MapFocusController({
+  markersRef, focusAsset, nonce,
+}: {
+  markersRef: React.MutableRefObject<Map<string, L.Marker>>;
+  focusAsset?: string | null;
+  nonce?: number;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    if (!focusAsset) return;
+    const marker = markersRef.current.get(focusAsset);
+    if (!marker) return;
+    const latlng = marker.getLatLng();
+    map.flyTo(latlng, Math.max(map.getZoom(), 9), { duration: 0.6 });
+    // Open the popup after the fly animation settles so it anchors correctly.
+    const t = setTimeout(() => marker.openPopup(), 650);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce, focusAsset]);
   return null;
 }
 
@@ -142,9 +169,15 @@ interface Props {
     filter: GridFilter;
     view: ViewMode;
     onStats?: (stats: GridStats) => void;
+    // Lifts the time-slider year up to the page so the activity feed can share it.
+    onYearChange?: (year: YearFilter) => void;
+    // Asset to pan to + highlight (set when a feed card is clicked). The nonce
+    // changes on every click so re-selecting the same asset re-triggers the focus.
+    focusAsset?: string | null;
+    focusNonce?: number;
 }
 
-export default function GridMap({ lang, filter, view, onStats }: Props) {
+export default function GridMap({ lang, filter, view, onStats, onYearChange, focusAsset, focusNonce }: Props) {
   const [data, setData] = useState<GridData>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null, esiSites: null, outageEvents: null, maintenanceEvents: null });
   const [loadError, setLoadError] = useState<boolean>(false);
   const [senegalBorder, setSenegalBorder] = useState<GeoJSON.Feature | null>(null);
@@ -218,6 +251,14 @@ export default function GridMap({ lang, filter, view, onStats }: Props) {
     () => availableYears(data.outageEvents ?? null, data.maintenanceEvents ?? null),
     [data.outageEvents, data.maintenanceEvents],
   );
+  // Mirror the year up to the page (activity feed shares the same scope).
+  useEffect(() => { onYearChange?.(year); }, [year, onYearChange]);
+
+  // Registry of node markers by stable asset id, populated as markers are built
+  // in pointToLayer. Used by MapFocusController to pan + open a popup when a feed
+  // card is clicked. Rebuilt whenever the GeoJSON layers re-render (view/lang/year
+  // changes remount them), so it always reflects the markers currently on the map.
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
   // Reliability profiles: aggregate events per asset for the selected year
   // window. Keyed by asset id for O(1) lookup during render.
@@ -405,7 +446,9 @@ export default function GridMap({ lang, filter, view, onStats }: Props) {
       const d = heatRadius(score);
       const ring = score > 0 ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.45)";
       const html = `<div style="background-color:${color};width:${d}px;height:${d}px;border:2px solid ${ring};border-radius:50%;box-shadow:0 0 ${Math.round(d * 0.9)}px ${color}AA;"></div>`;
-      return L.marker(latlng, { icon: L.divIcon({ className: "custom-div-icon", html, iconSize: [d, d], iconAnchor: [d / 2, d / 2] }) });
+      const relMarker = L.marker(latlng, { icon: L.divIcon({ className: "custom-div-icon", html, iconSize: [d, d], iconAnchor: [d / 2, d / 2] }) });
+      if (p.id) markersRef.current.set(p.id, relMarker);
+      return relMarker;
     }
 
     let color = "#2579fc";
@@ -423,7 +466,9 @@ export default function GridMap({ lang, filter, view, onStats }: Props) {
         ? `<div style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 5px ${color}CC) drop-shadow(0 0 1px rgba(255,255,255,0.65));"><div style="background-color:${color};width:100%;height:100%;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);"></div></div>`
         : `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border: 2px solid rgba(255,255,255,1); border-radius: 50%; box-shadow: 0 0 15px ${color}CC;"></div>`;
 
-    return L.marker(latlng, { icon: L.divIcon({ className: "custom-div-icon", html: iconHtml, iconSize: [size, size], iconAnchor: [size/2, size/2] }) });
+    const infraMarker = L.marker(latlng, { icon: L.divIcon({ className: "custom-div-icon", html: iconHtml, iconSize: [size, size], iconAnchor: [size/2, size/2] }) });
+    if (p.id) markersRef.current.set(p.id, infraMarker);
+    return infraMarker;
   };
 
   // Localized reliability-profile popup for a node in reliability mode.
@@ -583,6 +628,7 @@ export default function GridMap({ lang, filter, view, onStats }: Props) {
         {processedData.consumers && <GeoJSON key={`cons-${view}-${lang}-${year}`} data={processedData.consumers} pointToLayer={pointToLayer} onEachFeature={onEachPlantFeature} />}
         {/* ESI sites parked until real assets exist — see src/lib/config.ts */}
         {SHOW_ESI_SITES && <EsiLayerManager data={processedData.esiSites} />}
+        <MapFocusController markersRef={markersRef} focusAsset={focusAsset} nonce={focusNonce} />
       </MapContainer>
 
       {/* Time slider — reliability mode only. Scrubs events by calendar year;

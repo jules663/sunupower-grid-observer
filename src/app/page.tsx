@@ -3,11 +3,12 @@
 import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Globe, Info, Layers } from "lucide-react";
+import { Globe, Info, Layers, CalendarClock } from "lucide-react";
 import type { GridStats } from "@/components/map/GridMap";
 import { ContextPanel, Legend, ReliabilityLegend } from "@/components/ui/panels";
 import { FilterControls } from "@/components/ui/FilterControls";
 import { ViewToggle } from "@/components/ui/ViewToggle";
+import { GridActivityFeed, type FeedStrings } from "@/components/ui/GridActivityFeed";
 
 const GridMap = dynamic(() => import("@/components/map/GridMap"), {
   ssr: false,
@@ -22,6 +23,18 @@ export default function Home() {
   const [view, setView] = useState<ViewMode>("reliability");
   const [mobilePanel, setMobilePanel] = useState<null | "context" | "legend">(null);
   const [stats, setStats] = useState<GridStats | null>(null);
+  const [feedOpen, setFeedOpen] = useState(false);
+  // Time-slider year, lifted from GridMap so the activity feed shares the scope.
+  const [year, setYear] = useState<number | "all">("all");
+  const handleYearChange = useCallback((y: number | "all") => setYear(y), []);
+  // Feed card → map focus: the asset to pan to, with a nonce so clicking the same
+  // card again re-triggers the focus animation.
+  const [focusAsset, setFocusAsset] = useState<string | null>(null);
+  const [focusNonce, setFocusNonce] = useState(0);
+  const handleFocusAsset = useCallback((assetRef: string) => {
+    setFocusAsset(assetRef);
+    setFocusNonce((n) => n + 1);
+  }, []);
 
   const handleStats = useCallback((s: GridStats) => setStats(s), []);
 
@@ -78,6 +91,25 @@ export default function Home() {
       confReported: "Reported",
       confModeled: "Modeled",
       relLegalNote: "Reliability index is indicative — seeded from public & modeled data. Measured utility/ESI telemetry supersedes it as available.",
+      activityBtn: "Activity",
+      feedTitle: "Grid Activity",
+      feedSubtitle: "Maintenance schedule and reliability events, ahead to past.",
+      searchPlaceholder: "Search events, assets, causes",
+      feedAhead: "Ahead",
+      feedCurrent: "Current",
+      feedPast: "Past",
+      feedNoEvents: "No recorded events",
+      feedNoMatch: "No events match the current filters",
+      showIncidents: "Incidents",
+      hideIncidents: "Incidents",
+      typeMaintenance: "Maintenance",
+      typeOutage: "Outage",
+      typeConstraint: "Constraint",
+      feedOngoing: "ongoing",
+      plannedTag: "Planned",
+      customersAffected: "customers",
+      filtersLabel: "Filter events by type",
+      feedClose: "Close activity feed",
     },
     FR: {
       title: "Observateur de Réseau",
@@ -117,10 +149,54 @@ export default function Home() {
       confReported: "Rapporté",
       confModeled: "Modélisé",
       relLegalNote: "L'indice de fiabilité est indicatif — basé sur des données publiques et modélisées. La télémétrie mesurée (réseau/ESI) le remplace dès que disponible.",
+      activityBtn: "Activité",
+      feedTitle: "Activité du Réseau",
+      feedSubtitle: "Calendrier de maintenance et évènements de fiabilité, à venir et passés.",
+      searchPlaceholder: "Rechercher évènements, actifs, causes",
+      feedAhead: "À venir",
+      feedCurrent: "En cours",
+      feedPast: "Passé",
+      feedNoEvents: "Aucun évènement enregistré",
+      feedNoMatch: "Aucun évènement ne correspond aux filtres",
+      showIncidents: "Incidents",
+      hideIncidents: "Incidents",
+      typeMaintenance: "Maintenance",
+      typeOutage: "Panne",
+      typeConstraint: "Contrainte",
+      feedOngoing: "en cours",
+      plannedTag: "Planifié",
+      customersAffected: "clients",
+      filtersLabel: "Filtrer les évènements par type",
+      feedClose: "Fermer le flux d'activité",
     },
   }[lang];
 
   const loading = stats === null;
+
+  const feedStrings: FeedStrings = {
+    feedTitle: t.feedTitle,
+    feedSubtitle: t.feedSubtitle,
+    searchPlaceholder: t.searchPlaceholder,
+    ahead: t.feedAhead,
+    current: t.feedCurrent,
+    past: t.feedPast,
+    noEvents: t.feedNoEvents,
+    noMatch: t.feedNoMatch,
+    showIncidents: t.showIncidents,
+    hideIncidents: t.hideIncidents,
+    typeMaintenance: t.typeMaintenance,
+    typeOutage: t.typeOutage,
+    typeConstraint: t.typeConstraint,
+    ongoing: t.feedOngoing,
+    plannedTag: t.plannedTag,
+    customersAffected: t.customersAffected,
+    filtersLabel: t.filtersLabel,
+    closeLabel: t.feedClose,
+    confMeasured: t.confMeasured,
+    confReported: t.confReported,
+    confModeled: t.confModeled,
+    locale: lang === "EN" ? "en-US" : "fr-FR",
+  };
 
   return (
     <main className="flex flex-col h-screen w-full bg-sunu-phantom overflow-hidden">
@@ -151,6 +227,20 @@ export default function Home() {
           </div>
           <button
             type="button"
+            onClick={() => setFeedOpen((v) => !v)}
+            aria-expanded={feedOpen}
+            aria-label={t.feedTitle}
+            className={`flex items-center gap-2 px-4 py-2 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
+              feedOpen
+                ? "bg-sunu-blue/15 border-sunu-blue/50 text-sunu-blue"
+                : "bg-white/[0.03] border-white/10 text-sunu-cloud hover:border-sunu-blue hover:bg-white/[0.08]"
+            }`}
+          >
+            <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
+            <span className="hidden sm:inline text-[11px] font-bold uppercase tracking-wider">{t.activityBtn}</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setLang(lang === "EN" ? "FR" : "EN")}
             aria-label={t.langSwitch}
             className="flex items-center gap-2 px-4 py-2 rounded bg-white/[0.03] border border-white/10 hover:border-sunu-blue hover:bg-white/[0.08] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70"
@@ -177,7 +267,24 @@ export default function Home() {
 
       {/* Main Map Content */}
       <div id="grid-map" className="flex-1 relative min-h-0" role="region" aria-label={t.mapLabel}>
-        <GridMap lang={lang} filter={filter} view={view} onStats={handleStats} />
+        <GridMap
+          lang={lang}
+          filter={filter}
+          view={view}
+          onStats={handleStats}
+          onYearChange={handleYearChange}
+          focusAsset={focusAsset}
+          focusNonce={focusNonce}
+        />
+
+        {/* Grid Activity Feed — toggleable right panel (maintenance-led, all sizes) */}
+        <GridActivityFeed
+          open={feedOpen}
+          onClose={() => setFeedOpen(false)}
+          year={year}
+          strings={feedStrings}
+          onFocusAsset={handleFocusAsset}
+        />
 
         {/* Meta Stats Panel — desktop only */}
         <div className="hidden lg:block absolute top-8 left-8 z-[2000] w-[340px] space-y-4 pointer-events-none">

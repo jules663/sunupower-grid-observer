@@ -248,11 +248,10 @@ export default function Home() {
             type="button"
             onClick={() => setLang(lang === "EN" ? "FR" : "EN")}
             aria-label={t.langSwitch}
-            className="px-2 py-2 text-[12px] font-bold tracking-wider text-sunu-space hover:text-sunu-cloud transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 rounded"
+            className="flex items-center gap-1 px-1.5 py-1.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70"
           >
-            <span className={lang === "EN" ? "text-sunu-cloud" : ""}>EN</span>
-            <span className="text-sunu-space/40 mx-1">/</span>
-            <span className={lang === "FR" ? "text-sunu-cloud" : ""}>FR</span>
+            <span className={`text-[13px] font-bold tracking-wider px-1.5 py-0.5 rounded transition-all ${lang === "EN" ? "bg-sunu-blue/20 text-sunu-blue" : "text-sunu-space/50"}`}>EN</span>
+            <span className={`text-[13px] font-bold tracking-wider px-1.5 py-0.5 rounded transition-all ${lang === "FR" ? "bg-sunu-blue/20 text-sunu-blue" : "text-sunu-space/50"}`}>FR</span>
           </button>
         </div>
 
@@ -280,11 +279,10 @@ export default function Home() {
             type="button"
             onClick={() => setLang(lang === "EN" ? "FR" : "EN")}
             aria-label={t.langSwitch}
-            className="px-2 py-2 text-[12px] font-bold tracking-wider text-sunu-space hover:text-sunu-cloud transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 rounded"
+            className="flex items-center gap-1 px-1.5 py-1.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70"
           >
-            <span className={lang === "EN" ? "text-sunu-cloud" : ""}>EN</span>
-            <span className="text-sunu-space/40 mx-1">/</span>
-            <span className={lang === "FR" ? "text-sunu-cloud" : ""}>FR</span>
+            <span className={`text-[13px] font-bold tracking-wider px-1.5 py-0.5 rounded transition-all ${lang === "EN" ? "bg-sunu-blue/20 text-sunu-blue" : "text-sunu-space/50"}`}>EN</span>
+            <span className={`text-[13px] font-bold tracking-wider px-1.5 py-0.5 rounded transition-all ${lang === "FR" ? "bg-sunu-blue/20 text-sunu-blue" : "text-sunu-space/50"}`}>FR</span>
           </button>
         </div>
 

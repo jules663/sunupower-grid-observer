@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 
 const manrope = Manrope({ subsets: ["latin"], weight: ["200", "300", "400", "500", "600", "700", "800"] });
 
-const SITE_URL = "https://sunupower-grid-observer-v1.vercel.app";
+const SITE_URL = "https://sunupower-grid-observer.vercel.app";
 const TITLE = "SunuPower Grid Observer";
 const DESCRIPTION =
   "Interactive advisory map of Senegal's electricity transmission network — 225kV and 90kV backbones, MV grid, power plants, and SunuPower ESI sites across ECOWAS/Senegal.";

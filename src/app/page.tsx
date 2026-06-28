@@ -34,6 +34,12 @@ export default function Home() {
   const handleFocusAsset = useCallback((assetRef: string) => {
     setFocusAsset(assetRef);
     setFocusNonce((n) => n + 1);
+    // On mobile the Activity panel is full-width and covers the map, so closing
+    // it on selection reveals the focused node + its popup. On desktop (lg+) the
+    // panel is a side column with the map beside it, so keep it open for browsing.
+    if (typeof window !== "undefined" && !window.matchMedia("(min-width: 1024px)").matches) {
+      setFeedOpen(false);
+    }
   }, []);
 
   const handleStats = useCallback((s: GridStats) => setStats(s), []);
@@ -246,10 +252,17 @@ export default function Home() {
           </button>
 
           {/* Logo: original asset, unaltered. Sized up for visibility only.
-              No backing plate, no recolor, gold accent bar untouched. */}
-          <div className="flex items-center shrink-0">
+              No backing plate, no recolor, gold accent bar untouched.
+              Links to the SunuPower corporate site (external, new tab). */}
+          <a
+            href="https://sunupower-corporate-v2.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="SunuPower corporate website (opens in a new tab)"
+            className="flex items-center shrink-0 rounded transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70"
+          >
             <Image src="/brand/logo-light-text.png" alt="SunuPower" width={180} height={36} priority className="object-contain h-6 sm:h-7 w-auto" />
-          </div>
+          </a>
         </div>
       </header>
 

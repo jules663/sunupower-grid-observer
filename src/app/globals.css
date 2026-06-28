@@ -67,3 +67,16 @@ body {
 .leaflet-control-attribution a {
   color: #BCBFCC !important;
 }
+
+/* Zoom control (bottom-left): on mobile the INFO button + year slider crowd the
+   same corner, and pinch-to-zoom is the native touch gesture, so the on-screen
+   +/- buttons are redundant clutter there. Hide them on mobile; show on desktop
+   where they are useful and the corner is uncrowded. */
+.leaflet-bottom.leaflet-left {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .leaflet-bottom.leaflet-left {
+    display: block;
+  }
+}

@@ -3,7 +3,7 @@
 SunuPower Grid Observer is a Next.js 14 (App Router) single-page app that renders
 an interactive Leaflet map of Senegal's electricity transmission network.
 
-- **Production:** https://sunupower-grid-observer-v1.vercel.app (Vercel)
+- **Production:** https://sunupower-grid-observer.vercel.app (Vercel)
 - **Stack:** Next.js 14.2.3 · React 18 · TypeScript 5 · Tailwind 3.4 · Leaflet 1.9 / react-leaflet 4.2
 
 ---
@@ -268,3 +268,104 @@ Remaining (see the full spec, `Grid_Observer_Reliability_Layer_Spec.docx`):
 
 - **Phase 4** — ingest first-party ESI telemetry / optional SENELEC feed as
   `measured` events; same UI, upgraded data.
+
+---
+
+## Grid Activity Feed + UI pass (2026-06)
+
+A "when" surface to complement the map's "where", plus a header cleanup and a
+mobile responsiveness pass. Shipped to production.
+
+### Grid Activity Feed
+
+A toggleable right-side panel (the **Activity** button in the header) that lists
+maintenance and reliability events chronologically, grouped relative to *now*
+into **Ahead / Current / Past**. It is **maintenance-led**: planned maintenance
+is the primary content; outage/constraint incidents are secondary and collapse
+behind an "Incidents" toggle. A search box plus type filters answer "query old
+events".
+
+- **Logic is pure and testable** in `src/lib/feed.ts` (`buildFeedEvents`,
+  `buildFeedSections`, `defaultFilters`). Classification: `start > now` →
+  Ahead; `start <= now <= end` (or no end) → Current; `end < now` → Past.
+  Constraints (no end) read as ongoing/Current.
+- **Panel component** is `src/components/ui/GridActivityFeed.tsx`. It fetches the
+  same static event files the map uses (browser-cached) plus the node/plant files
+  to resolve `asset_ref` → display name, so a card never shows a bare slug.
+- **Posture preserved:** every card shows the `confidence` tier and `source`
+  verbatim. The feed never infers, predicts, or upgrades confidence.
+- **Look-ahead seed:** `maintenance-events.json` carries a few honestly-labeled
+  future planned-maintenance entries (`planned: true`, `reported`) so Ahead /
+  Current populate. The mechanism is dynamic — it will fill from real future
+  events as they are added.
+
+### Card → map focus
+
+Clicking a feed card flies the map to that asset and opens its popup. Markers are
+registered by stable `id` in a registry inside `GridMap` as they are drawn; a
+small `MapFocusController` (same `useMap()` pattern as the pane-setup helpers)
+watches a `focusAsset` + nonce and does the `flyTo` + `openPopup`. The nonce lets
+clicking the same card re-trigger the animation.
+
+- **Mobile:** the panel is full-width, so on selection it auto-closes (below the
+  `lg` breakpoint) to reveal the focused node + popup. On desktop the panel is a
+  side column with the map beside it, so it stays open for browsing.
+
+### Feed time axis is decoupled from the year slider (do not re-couple)
+
+The feed runs on its own Ahead/Current/Past axis (relative to now) and always
+uses all years. The map's **Period** slider filters only the map heat by calendar
+year — a different time model. Coupling the two made past-year events appear
+under "Current", which was misleading. `page.tsx` and `GridActivityFeed` carry
+comments marking this as intentional.
+
+### Header cleanup + interactive legend
+
+The voltage selector (225 / 90 / MV) was removed from the header (and the mobile
+strip) to keep the header clean. The filter now lives **in the legend, in
+Infrastructure view only**:
+
+- **Reliability view (default):** no voltage filter UI — voltage-colored lines
+  render as dimmed map context only. The legend is the reliability legend (stress
+  scale + confidence).
+- **Infrastructure view:** the legend's "Networks" section is interactive —
+  clicking 225 / 90 / MV sets the single active filter (clicking the active one
+  clears to All), the same single-select logic the header used to host. OMVG
+  cross-border is a **reference line** (dimmed, non-clickable) because it is a
+  225kV subset, not a separate filterable voltage. Logic lives in
+  `src/components/ui/panels.tsx` (`Legend`); the old `FilterControls` is no
+  longer wired in.
+
+### Sticky section header — frosted, no ghosting (do not regress)
+
+The Ahead/Current/Past section headers are `sticky top-0`. The scroll container
+uses `pt-0 pb-4` (not `py-4`) so the header pins flush to the true top edge with
+no dead space above it, and the header background is a strong frosted glass
+(`blur(16px) saturate(160%)` at `0.82` opacity, extended edge-to-edge with
+`-mx-5 px-5`) so cards scrolling underneath blur into it rather than ghosting
+through as legible text. Both conditions are required — a translucent header or a
+top-padded container reintroduces the bleed-through.
+
+### Mobile bottom + header layout (do not regress)
+
+The bottom-edge controls stack without overlap on mobile:
+
+- Year slider raised to `bottom-28` (and horizontally scrollable with a clamped
+  width); Info / Legend row at `bottom-9`; Leaflet attribution pinned to a thin
+  centered strip at `bottom: 0` (themed in `globals.css`).
+- The Leaflet **zoom control is hidden on mobile** (`display: none` on
+  `.leaflet-bottom.leaflet-left`, restored at `lg`) — it collided with the Info
+  button, and pinch-to-zoom is the native touch gesture. Desktop keeps the +/−
+  buttons.
+- Header padding/gaps are responsive and the subtitle is hidden below `sm` so the
+  logo is never squeezed.
+
+### Logo + cross-link
+
+The header logo is the original `logo-light-text.png` asset, unaltered (no
+backing plate, no recolor, gold accent bar untouched), sized for visibility
+(`h-6 sm:h-7`). It links to the SunuPower corporate site
+(`https://sunupower-corporate-v2.vercel.app/`, new tab). The corporate site's
+footer carries the reciprocal link — "Network Map" / "Carte du réseau" in the
+Resources group — pointing back to the Grid Observer production URL
+(`https://sunupower-grid-observer.vercel.app/`).

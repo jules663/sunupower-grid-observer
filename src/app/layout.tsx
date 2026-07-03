@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+// Self-hosted Manrope (variable, weights 200–800) via @fontsource. Removes the
+// build-time Google Fonts fetch (and the offline-build hang) — the font is
+// served from the app's own bundle. Applied as font-family in globals.css.
+import "@fontsource-variable/manrope";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
-
-const manrope = Manrope({ subsets: ["latin"], weight: ["200", "300", "400", "500", "600", "700", "800"] });
 
 const SITE_URL = "https://sunupower-grid-observer.vercel.app";
 const TITLE = "SunuPower Grid Observer";
@@ -50,7 +51,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={manrope.className}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

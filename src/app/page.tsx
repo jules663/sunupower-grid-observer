@@ -5,9 +5,11 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Info, Layers, CalendarClock } from "lucide-react";
 import type { GridStats } from "@/components/map/GridMap";
-import { ContextPanel, Legend, ReliabilityLegend } from "@/components/ui/panels";
+import { ContextPanel, Legend, ReliabilityLegend, MeasuredIndicesPanel } from "@/components/ui/panels";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { GridActivityFeed, type FeedStrings } from "@/components/ui/GridActivityFeed";
+import type { EventConfidence } from "@/types/grid";
+import type { MeasuredIndex } from "@/lib/reliability";
 
 const GridMap = dynamic(() => import("@/components/map/GridMap"), {
   ssr: false,
@@ -44,9 +46,30 @@ export default function Home() {
 
   const handleStats = useCallback((s: GridStats) => setStats(s), []);
 
+  // Data-confidence filter (reliability view): which tiers heat the map. All on
+  // by default; toggling lets a viewer strip to measured evidence. Guarded so the
+  // last active tier can't be turned off (an empty map is not a useful state).
+  const [confidenceFilter, setConfidenceFilter] = useState<Set<EventConfidence>>(
+    new Set<EventConfidence>(["measured", "reported", "modeled"]),
+  );
+  const handleToggleConfidence = useCallback((tier: EventConfidence) => {
+    setConfidenceFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(tier)) next.delete(tier); else next.add(tier);
+      if (next.size === 0) next.add(tier); // never allow an empty set
+      return next;
+    });
+  }, []);
+
+  // Measured SAIFI/SAIDI indices emitted by the map once events load.
+  const [indices, setIndices] = useState<Map<string, MeasuredIndex[]>>(new Map());
+  const handleIndices = useCallback((m: Map<string, MeasuredIndex[]>) => setIndices(m), []);
+  // First scope's series for the indicator panel (currently the Dakar system).
+  const indexSeries = Array.from(indices.values())[0] ?? [];
+
   // Localized display strings for the computed stats; em dash while loading.
-  const kmDisplay = stats ? stats.totalKm.toLocaleString(lang === "EN" ? "en-US" : "fr-FR") : "—";
-  const nodeDisplay = stats ? String(stats.nodeCount) : "—";
+  const kmDisplay = stats ? stats.totalKm.toLocaleString(lang === "EN" ? "en-US" : "fr-FR") : "…";
+  const nodeDisplay = stats ? String(stats.nodeCount) : "…";
 
   // Close the mobile bottom sheet on Escape for keyboard users.
   useEffect(() => {
@@ -68,7 +91,7 @@ export default function Home() {
       contextTitle: "Regional Context: ECOWAS/Senegal",
       trace: "Transmission Trace",
       nodes: "Registered Nodes",
-      legal: "Grid trace compiled from World Bank map archives (IBRD #33982, 2005), OpenStreetMap, and SOMELEC/ECREEE references. Indicative routing — advisory posture maintained.",
+      legal: "Grid trace compiled from World Bank map archives (IBRD #33982, 2005), OpenStreetMap, and SOMELEC/ECREEE references. Indicative routing. Advisory posture maintained.",
       fuelTitle: "Asset Diversity",
       thermal: "Thermal/Oil",
       solar: "Solar",
@@ -96,7 +119,22 @@ export default function Home() {
       confMeasured: "Measured",
       confReported: "Reported",
       confModeled: "Modeled",
-      relLegalNote: "Reliability index is indicative — seeded from public & modeled data. Measured utility/ESI telemetry supersedes it as available.",
+      relLegalNote: "Reliability index is indicative, seeded from public and modeled data. Measured utility/ESI telemetry supersedes it as available.",
+      confMeasuredDesc: "Utility or ESI telemetry: observed, not estimated.",
+      confReportedDesc: "Press, CRSE, or World Bank references.",
+      confModeledDesc: "Topology-derived estimate, not a measurement.",
+      confFilterHint: "tap to filter",
+      indicesTitle: "Measured Reliability Indices",
+      saifiLabel: "SAIFI",
+      saifiUnit: "interruptions / customer",
+      saidiLabel: "SAIDI",
+      saidiUnit: "minutes / customer",
+      indicesScope: "Scope",
+      indicesNote: "Aggregate system-level indices for the stated scope and period, not per-node values. Source: reported utility figures.",
+      indicesEmpty: "No measured indices available.",
+      methTitle: "Data and Methodology",
+      methUpdated: "Data updated",
+      methUpdatedDate: "2026-07",
       activityBtn: "Activity",
       feedTitle: "Grid Activity",
       feedSubtitle: "Maintenance schedule and reliability events, ahead to past.",
@@ -126,7 +164,7 @@ export default function Home() {
       contextTitle: "Contexte Régional : CEDEAO/Sénégal",
       trace: "Tracé de Transmission",
       nodes: "Nœuds Enregistrés",
-      legal: "Tracé du réseau compilé à partir des archives cartographiques de la Banque Mondiale (IBRD #33982, 2005), d'OpenStreetMap et des références SOMELEC/ECREEE. Tracé indicatif — posture consultative maintenue.",
+      legal: "Tracé du réseau compilé à partir des archives cartographiques de la Banque Mondiale (IBRD #33982, 2005), d'OpenStreetMap et des références SOMELEC/ECREEE. Tracé indicatif. Posture consultative maintenue.",
       fuelTitle: "Diversité des Actifs",
       thermal: "Thermique/Fioul",
       solar: "Solaire",
@@ -154,7 +192,22 @@ export default function Home() {
       confMeasured: "Mesuré",
       confReported: "Rapporté",
       confModeled: "Modélisé",
-      relLegalNote: "L'indice de fiabilité est indicatif — basé sur des données publiques et modélisées. La télémétrie mesurée (réseau/ESI) le remplace dès que disponible.",
+      relLegalNote: "L'indice de fiabilité est indicatif, basé sur des données publiques et modélisées. La télémétrie mesurée (réseau/ESI) le remplace dès que disponible.",
+      confMeasuredDesc: "Télémétrie réseau ou ESI : observée, non estimée.",
+      confReportedDesc: "Références presse, CRSE ou Banque Mondiale.",
+      confModeledDesc: "Estimation dérivée de la topologie, non une mesure.",
+      confFilterHint: "toucher pour filtrer",
+      indicesTitle: "Indices de fiabilité mesurés",
+      saifiLabel: "SAIFI",
+      saifiUnit: "interruptions / client",
+      saidiLabel: "SAIDI",
+      saidiUnit: "minutes / client",
+      indicesScope: "Périmètre",
+      indicesNote: "Indices agrégés au niveau du système pour le périmètre et la période indiqués, non des valeurs par nœud. Source : chiffres rapportés du réseau.",
+      indicesEmpty: "Aucun indice mesuré disponible.",
+      methTitle: "Données et méthodologie",
+      methUpdated: "Données mises à jour",
+      methUpdatedDate: "2026-07",
       activityBtn: "Activité",
       feedTitle: "Activité du Réseau",
       feedSubtitle: "Calendrier de maintenance et évènements de fiabilité, à venir et passés.",
@@ -318,6 +371,8 @@ export default function Home() {
           onStats={handleStats}
           focusAsset={focusAsset}
           focusNonce={focusNonce}
+          confidenceFilter={confidenceFilter}
+          onIndices={handleIndices}
         />
 
         {/* Grid Activity Feed — toggleable right panel (maintenance-led, all sizes).
@@ -331,16 +386,24 @@ export default function Home() {
           onFocusAsset={handleFocusAsset}
         />
 
-        {/* Meta Stats Panel — desktop only */}
-        <div className="hidden lg:block absolute top-8 left-8 z-[2000] w-[340px] space-y-4 pointer-events-none">
+        {/* Meta Stats Panel — desktop only. Reliability view adds the measured
+            SAIFI/SAIDI indicator below the regional context. */}
+        <div className="hidden lg:block absolute top-8 left-8 z-[2000] w-[340px] space-y-4 pointer-events-none max-h-[calc(100vh-4rem)] overflow-y-auto no-scrollbar">
           <div className="glass-panel p-7 rounded-xl pointer-events-auto">
             <ContextPanel t={t} kmDisplay={kmDisplay} nodeDisplay={nodeDisplay} loading={loading} />
           </div>
+          {view === "reliability" && (
+            <div className="glass-panel p-7 rounded-xl pointer-events-auto">
+              <MeasuredIndicesPanel t={t} series={indexSeries} />
+            </div>
+          )}
         </div>
 
         {/* Legend Overlay — desktop only */}
         <div className="hidden lg:block absolute bottom-12 right-8 z-[2000] p-6 glass-panel rounded-xl text-left pointer-events-auto w-[280px]">
-          {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} filter={filter} setFilter={setFilter} />}
+          {view === "reliability"
+            ? <ReliabilityLegend t={t} confidenceFilter={confidenceFilter} onToggleConfidence={handleToggleConfidence} />
+            : <Legend t={t} filter={filter} setFilter={setFilter} />}
         </div>
 
         {/* Mobile panel toggle buttons — bottom-left (Info) and bottom-right (Legend).
@@ -383,12 +446,19 @@ export default function Home() {
                 <div className="w-10 h-1 rounded-full bg-white/20" aria-hidden="true" />
               </div>
               {mobilePanel === "context" ? (
-                <div className="px-7 pb-8">
+                <div className="px-7 pb-8 space-y-7">
                   <ContextPanel t={t} kmDisplay={kmDisplay} nodeDisplay={nodeDisplay} loading={loading} />
+                  {view === "reliability" && (
+                    <div className="border-t border-white/10 pt-6">
+                      <MeasuredIndicesPanel t={t} series={indexSeries} />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="px-6 pb-8">
-                  {view === "reliability" ? <ReliabilityLegend t={t} /> : <Legend t={t} filter={filter} setFilter={setFilter} />}
+                  {view === "reliability"
+                    ? <ReliabilityLegend t={t} confidenceFilter={confidenceFilter} onToggleConfidence={handleToggleConfidence} />
+                    : <Legend t={t} filter={filter} setFilter={setFilter} />}
                 </div>
               )}
             </div>

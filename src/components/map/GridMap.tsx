@@ -7,9 +7,9 @@ import "leaflet/dist/leaflet.css";
 import { GridFilter, ViewMode } from "@/app/page";
 import type {
   GridData, LineFeature, LineProps, NodeFeature, NodeProps,
-  EsiProps, Coordinate, LineCollection, EventCollection, ReliabilityProfile,
+  EsiProps, Coordinate, LineCollection, EventCollection, ReliabilityProfile, EventConfidence,
 } from "@/types/grid";
-import { computeReliability, heatColor, heatRadius, availableYears, type YearFilter } from "@/lib/reliability";
+import { computeReliability, heatColor, heatRadius, availableYears, measuredIndicesByScope, type YearFilter, type MeasuredIndex } from "@/lib/reliability";
 import { SHOW_ESI_SITES } from "@/lib/config";
 
 // Popups live in a pane that is a direct child of .leaflet-container, NOT inside
@@ -173,9 +173,15 @@ interface Props {
     // changes on every click so re-selecting the same asset re-triggers the focus.
     focusAsset?: string | null;
     focusNonce?: number;
+    // Data-confidence filter (reliability view): which confidence tiers heat the
+    // map. Undefined = all tiers. Lets the viewer strip to measured evidence.
+    confidenceFilter?: Set<EventConfidence>;
+    // Emits the measured SAIFI/SAIDI indicator series (per scope) once events
+    // load, so the page can render the indices panel without re-fetching.
+    onIndices?: (indices: Map<string, MeasuredIndex[]>) => void;
 }
 
-export default function GridMap({ lang, filter, view, onStats, focusAsset, focusNonce }: Props) {
+export default function GridMap({ lang, filter, view, onStats, focusAsset, focusNonce, confidenceFilter, onIndices }: Props) {
   const [data, setData] = useState<GridData>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null, esiSites: null, outageEvents: null, maintenanceEvents: null });
   const [loadError, setLoadError] = useState<boolean>(false);
   const [senegalBorder, setSenegalBorder] = useState<GeoJSON.Feature | null>(null);
@@ -258,10 +264,17 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
   // Reliability profiles: aggregate events per asset for the selected year
   // window. Keyed by asset id for O(1) lookup during render.
   const reliability = useMemo(
-    () => computeReliability(data.outageEvents ?? null, data.maintenanceEvents ?? null, year),
-    [data.outageEvents, data.maintenanceEvents, year],
+    () => computeReliability(data.outageEvents ?? null, data.maintenanceEvents ?? null, year, confidenceFilter),
+    [data.outageEvents, data.maintenanceEvents, year, confidenceFilter],
   );
   const isReliability = view === "reliability";
+
+  // Emit measured SAIFI/SAIDI indicators to the page once events load (year- and
+  // confidence-independent — these are utility-grade reported indices).
+  useEffect(() => {
+    if (!onIndices || !data.outageEvents) return;
+    onIndices(measuredIndicesByScope(data.outageEvents));
+  }, [data.outageEvents, onIndices]);
 
   // Latest SAIFI/SAIDI system indicator per asset (Phase 4) — for surfacing the
   // raw measured indices in popups. Keyed by asset_ref, keeping the most recent
@@ -474,7 +487,7 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
       : { measured: "Mesuré", reported: "Rapporté", modeled: "Modélisé" };
     const confColor: Record<string, string> = { measured: "#22C55E", reported: "#F59E0B", modeled: "#9DA2B3" };
     const sevLabel = (s: string | null) => {
-      if (!s) return "—";
+      if (!s) return "n/a";
       const en: Record<string, string> = { low: "Low", medium: "Medium", high: "High", critical: "Critical" };
       const fr: Record<string, string> = { low: "Faible", medium: "Moyen", high: "Élevé", critical: "Critique" };
       return (lang === "EN" ? en : fr)[s] ?? s;
@@ -505,13 +518,13 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
     if (idx && (idx.saifi != null || idx.saidi_min != null)) {
       const saidiTxt = idx.saidi_min != null
         ? `${Math.floor(idx.saidi_min / 60)}h${String(Math.round(idx.saidi_min % 60)).padStart(2, "0")}`
-        : "—";
+        : "n/a";
       const scopeLabel = lang === "EN" ? "System indicator" : "Indicateur système";
       const scopeTxt = `${esc(idx.scope ?? "")}${idx.period ? " · " + esc(idx.period) : ""}`;
       indexHtml = `
         <div class="mt-3 pt-2 border-t border-white/5">
           <div class="text-[9px] uppercase tracking-widest font-bold text-sunu-graphite mb-1.5">${scopeLabel}</div>
-          <div class="flex justify-between text-[10px]"><span class="text-sunu-graphite uppercase font-bold">SAIFI</span><span class="text-sunu-cloud font-mono">${idx.saifi != null ? esc(idx.saifi) : "—"}</span></div>
+          <div class="flex justify-between text-[10px]"><span class="text-sunu-graphite uppercase font-bold">SAIFI</span><span class="text-sunu-cloud font-mono">${idx.saifi != null ? esc(idx.saifi) : "n/a"}</span></div>
           <div class="flex justify-between text-[10px]"><span class="text-sunu-graphite uppercase font-bold">SAIDI</span><span class="text-sunu-cloud font-mono">${saidiTxt}</span></div>
           <div class="text-[9px] text-sunu-space mt-1.5 italic">${scopeTxt}</div>
         </div>`;

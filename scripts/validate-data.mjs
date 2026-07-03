@@ -81,8 +81,60 @@ function checkCollection(file, fc, kind) {
 }
 
 console.log("Validating GeoJSON data files…");
-for (const file of LINE_FILES) checkCollection(file, load(file), "line");
+const lineCollections = LINE_FILES.map((file) => ({ file, fc: load(file) }));
+for (const { file, fc } of lineCollections) checkCollection(file, fc, "line");
 for (const file of POINT_FILES) checkCollection(file, load(file), "point");
+
+// --- Node location sanity (catch the next Hann-style mislocation) ---
+// A node far from EVERY transmission line vertex is either genuinely remote or
+// grossly mislocated (the Hann bug relocated endpoints up to ~38 km). We flag
+// nodes beyond FAR_KM from any line. The threshold sits above the legitimately
+// remote sites in the current data (e.g. Matam ~22 km) so real data stays clean
+// while a gross displacement is caught. Note: a finer "in water" check (a node
+// dropped into the bay near dense Dakar lines) needs a higher-resolution
+// coastline than the current decorative border — deferred until that exists.
+const FAR_KM = 30;
+
+function haversineKm(lon1, lat1, lon2, lat2) {
+  const R = 6371, toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+const lineVertices = [];
+for (const { fc } of lineCollections) {
+  for (const f of fc?.features ?? []) {
+    if (f.geometry?.type === "LineString") {
+      for (const c of f.geometry.coordinates) {
+        if (Array.isArray(c) && typeof c[0] === "number" && typeof c[1] === "number") lineVertices.push(c);
+      }
+    }
+  }
+}
+
+function checkNodeLocations(file, fc) {
+  if (!fc?.features || lineVertices.length === 0) return;
+  fc.features.forEach((f, i) => {
+    const g = f.geometry;
+    if (g?.type !== "Point") return;
+    const [lon, lat] = g.coordinates;
+    if (typeof lon !== "number" || typeof lat !== "number") return;
+    let min = Infinity;
+    for (const v of lineVertices) {
+      const d = haversineKm(lon, lat, v[0], v[1]);
+      if (d < min) min = d;
+      if (min <= FAR_KM) break; // close enough; stop early
+    }
+    if (min > FAR_KM) {
+      const name = f.properties?.name ?? `feature ${i}`;
+      warn(`${file}[${i}] "${name}": ${min.toFixed(1)} km from the nearest transmission line (> ${FAR_KM} km) — verify location or that it belongs on the map`);
+    }
+  });
+}
+
+for (const file of POINT_FILES) checkNodeLocations(file, load(file));
 
 // --- Reliability events (Phase 1) ---
 // Collect the set of known asset ids so event asset_refs can be resolved.

@@ -233,17 +233,62 @@ gridobserver-v1/
 
 ## Known follow-ups (optional, not blockers)
 
-- **Self-host the Manrope font** — switch `next/font/google` to a local font to
-  remove the build-time Google dependency, speed first paint, and avoid the
-  offline-build hang.
-- **Security headers / CSP** — add `headers()` in `next.config.mjs`. The app loads
-  external CARTO tiles (`basemaps.cartocdn.com`) + a Google font, so scope a CSP
-  accordingly.
-- **Error boundary** — add `src/app/error.tsx` for a friendly fallback if a render
-  crashes (the map already handles data-fetch failures with a visible error state).
-- **Node-location validation** — extend `validate-data.mjs` to flag nodes that sit
-  in water or implausibly far from the lines connecting to them, to catch the next
-  Hann-style mislocation automatically.
+_The four items previously listed here were completed in the 2026-07 hardening
+pass (below). Remaining ideas:_
+
+- **Finer "in water" node check** — the current node-location validator catches
+  gross displacement (> 30 km from any line) but not a node dropped into the bay
+  near dense Dakar lines. That needs a higher-resolution coastline than the
+  current decorative `senegal-border.json` (too coarse to distinguish an inland
+  river-border node from an offshore point). Deferred until a finer coastline
+  exists.
+- **Stricter (nonce-based) CSP** — the shipped CSP keeps `'unsafe-inline'` /
+  `'unsafe-eval'` for Next hydration + Leaflet. A nonce-based policy would tighten
+  `script-src`; it is a larger change, not required for this public map.
+
+## Hardening pass (2026-07)
+
+Four production-hardening wins. All keep the map's behavior identical; verified
+`tsc` 0 errors and `validate-data` 0/0.
+
+### Self-hosted Manrope font
+
+Switched from `next/font/google` to **`@fontsource-variable/manrope`** (variable,
+weights 200–800), imported in `layout.tsx` and applied via `font-family` in
+`globals.css` (`"Manrope Variable"`). The font is now served from the app's own
+bundle — this removes the build-time Google Fonts fetch **and the offline-build
+hang** documented in the pre-ship checklist. Run `npm install` (or
+`yarn`) after pulling so `@fontsource-variable/manrope` is present.
+
+### Security headers / CSP (`next.config.mjs`)
+
+Added `async headers()` applying a Content-Security-Policy plus standard security
+headers to all routes. The CSP is scoped to what the app actually loads: CARTO
+basemap tiles (`img-src` + `connect-src` allow `basemaps.cartocdn.com`), the
+self-hosted font (`font-src 'self'`), and local `/data` GeoJSON (`connect-src
+'self'`). `script-src` / `style-src` keep `'unsafe-inline'` (+ `'unsafe-eval'`)
+because Next's hydration and Leaflet inject inline script/style. Also:
+`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`,
+`Permissions-Policy`, `Strict-Transport-Security`.
+**After deploy:** confirm the CARTO tiles still load and the browser console shows
+no CSP violations. Note `frame-ancestors 'none'` + `X-Frame-Options: DENY` block
+embedding the map in an iframe — relax both if an embed is ever wanted.
+
+### Error boundary (`src/app/error.tsx`)
+
+A branded, dark-theme route-level fallback for render crashes (the map already
+handles data-fetch failures with its own visible error state). Client component
+with a "Try again" (`reset`) and "Reload" action; logs the error to the console,
+no external reporting.
+
+### Node-location validation (`validate-data.mjs`)
+
+New check: a node farther than **30 km** from every transmission-line vertex is
+flagged (warning) as possibly mislocated or not belonging on the map — the
+Hann-style mislocation catcher. The 30 km threshold sits above the legitimately
+remote sites in the current data (e.g. Matam ~22 km) so real data stays clean
+(still 0/0). Uses a haversine distance to all line vertices with early-exit. A
+finer "in water" check is deferred (see follow-ups).
 
 ## Reliability Intelligence Layer — roadmap
 
@@ -369,3 +414,75 @@ backing plate, no recolor, gold accent bar untouched), sized for visibility
 footer carries the reciprocal link — "Network Map" / "Carte du réseau" in the
 Resources group — pointing back to the Grid Observer production URL
 (`https://sunupower-grid-observer.vercel.app/`).
+
+---
+
+## Transparency pass (2026-07)
+
+Three additions that sharpen Grid Observer as a credible public-interest
+instrument. The map's differentiator is honesty about what is measured vs.
+estimated, so these make that discipline visible and interactive. Bilingual
+EN/FR; reliability-view surfaces.
+
+### Confidence-tier filtering (interactive legend)
+
+The reliability legend's Measured / Reported / Modeled key is now clickable. Each
+tier toggles whether events of that confidence contribute to the map heat, so a
+viewer can strip the map down to hard (measured) evidence or exclude modeled
+estimates. Each tier also carries a one-line meaning (measured = observed utility/
+ESI telemetry; reported = press/CRSE/World Bank; modeled = topology-derived
+estimate). Guarded so the last active tier can't be turned off (an empty map is
+not useful). Composes with the year slider.
+
+- `src/lib/reliability.ts`: `computeReliability(...)` gains an optional
+  `confidence?: Set<EventConfidence>` param; events outside the set are excluded.
+- `src/components/map/GridMap.tsx`: `confidenceFilter` prop passed through to
+  `computeReliability`; the map re-heats on change.
+- `src/components/ui/panels.tsx`: `ReliabilityLegend` renders interactive tier
+  toggles (dimmed when off) when `confidenceFilter` + `onToggleConfidence` are
+  supplied; otherwise a static key with meanings.
+- `src/app/page.tsx`: `confidenceFilter` state (all tiers on by default) +
+  `handleToggleConfidence` (empty-set guard); wired to GridMap and both legend
+  surfaces (desktop overlay + mobile sheet).
+
+### Measured SAIFI / SAIDI indicator
+
+A reliability-view card surfaces the measured system reliability indices carried
+on `measured` events. Shows the latest value plus a compact trend across
+reporting periods (currently the Dakar system: 2024 H1 → 2024 H2 → 2025 H1). The
+scope and period are always disclosed, with a note that these are aggregate
+system-level figures, NOT per-node values — the honesty guard from `types/grid.ts`.
+Only `measured` events with an index qualify (reported/modeled never produce an
+"index", which would overstate certainty).
+
+- `src/lib/reliability.ts`: `measuredIndicesByScope(outage)` → `Map<scope,
+  MeasuredIndex[]>` (chronological series per scope). `MeasuredIndex` type added.
+- `src/components/map/GridMap.tsx`: emits the series via an `onIndices` callback
+  once events load (no re-fetch).
+- `src/components/ui/panels.tsx`: `MeasuredIndicesPanel` (latest + up to 3 prior
+  periods + scope/period disclosure + empty state).
+- `src/app/page.tsx`: `indices` state from `onIndices`; renders the panel below
+  the Context panel (desktop stack, `max-h` + `no-scrollbar`) and in the mobile
+  Info sheet. Reliability view only.
+
+### Methodology surface
+
+The Context panel's provenance is framed as a "Data and Methodology" block with a
+"Data updated" line; the confidence-tier meanings live in the legend. Together a
+first-time viewer can see how the map is built and what each confidence level
+means. Strings in `panels.tsx` `PanelStrings` (`methTitle`, `methUpdated`,
+`methUpdatedDate`, `conf*Desc`, `indices*`), EN + FR in `page.tsx`.
+
+### Writing-style cleanup (em-dashes)
+
+Per founder direction, the no-em-dash rule applies to EN as well as FR (correct
+grammar and orthography only). All **user-facing** em-dashes were removed:
+strings (legal / reliability notes, tier descriptions) now use commas/colons/
+periods; ampersands in prose spelled out ("public and modeled data"); loading
+placeholders use an ellipsis "…"; absent-value placeholders (map popups, indices
+panel) use "n/a"; `layout.tsx` title/description use a colon. Code comments (not
+visible) were left as-is.
+
+Verification: `npx tsc --noEmit` zero errors, `npm run validate-data` 0/0. Build
+run locally (Google-Fonts gate). Files: `reliability.ts`, `GridMap.tsx`,
+`panels.tsx`, `page.tsx`, `layout.tsx`.

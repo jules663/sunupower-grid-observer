@@ -67,6 +67,7 @@ export function computeReliability(
   outage: EventCollection | null,
   maintenance: EventCollection | null,
   year: YearFilter = "all",
+  confidence?: Set<EventConfidence>,
 ): ReliabilityResult {
   const all: EventProps[] = [
     ...(outage?.features ?? []).map((f) => f.properties),
@@ -80,6 +81,12 @@ export function computeReliability(
     return !isNaN(d.getTime()) && d.getUTCFullYear() === year;
   };
 
+  // Data-confidence filter: when provided, only events whose confidence tier is
+  // in the set contribute to the heat. Lets a viewer strip the map down to hard
+  // (measured) evidence, or exclude modeled estimates. Undefined = include all.
+  const inConfidence = (p: EventProps): boolean =>
+    !confidence || confidence.has(p.confidence);
+
   const acc = new Map<string, {
     count: number; hours: number; stress: number;
     worst: EventSeverity | null; conf: EventConfidence;
@@ -88,6 +95,7 @@ export function computeReliability(
   for (const p of all) {
     if (!p.asset_ref) continue;
     if (!inYear(p)) continue;
+    if (!inConfidence(p)) continue;
 
     const cur = acc.get(p.asset_ref) ?? {
       count: 0, hours: 0, stress: 0, worst: null as EventSeverity | null, conf: "measured" as EventConfidence,
@@ -155,4 +163,45 @@ export function availableYears(
   scan(outage);
   scan(maintenance);
   return Array.from(years).sort((a, b) => a - b);
+}
+
+// A measured system reliability indicator (SAIFI / SAIDI) reported for a scope
+// (e.g. "Dakar system") over a period. These are aggregate, utility-grade indices
+// carried on `measured` events, NOT per-node values — the scope is always shown
+// so the map never implies node-level precision the source doesn't provide.
+export interface MeasuredIndex {
+  scope: string;
+  period: string;
+  saifi?: number;      // interruptions per customer over the period
+  saidi_min?: number;  // interruption minutes per customer over the period
+  start: string;       // ISO period start, for ordering
+  confidence: EventConfidence;
+}
+
+// Extract measured SAIFI/SAIDI indicators, one series per scope, newest first.
+// Only `measured` events carrying an index are considered — reported/modeled
+// events never produce an "index" (that would overstate certainty). Returns a
+// map of scope → chronological series (oldest→newest) so the UI can show the
+// latest value plus its trend.
+export function measuredIndicesByScope(
+  outage: EventCollection | null,
+): Map<string, MeasuredIndex[]> {
+  const byScope = new Map<string, MeasuredIndex[]>();
+  (outage?.features ?? []).forEach((f) => {
+    const p = f.properties;
+    if (p.confidence !== "measured") return;
+    if (p.saifi == null && p.saidi_min == null) return;
+    if (!p.scope || !p.period) return;
+    const entry: MeasuredIndex = {
+      scope: p.scope, period: p.period, saifi: p.saifi,
+      saidi_min: p.saidi_min, start: p.start, confidence: p.confidence,
+    };
+    const arr = byScope.get(p.scope) ?? [];
+    arr.push(entry);
+    byScope.set(p.scope, arr);
+  });
+  // Sort each scope's series oldest→newest by period start.
+  Array.from(byScope.values()).forEach((arr) =>
+    arr.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()));
+  return byScope;
 }

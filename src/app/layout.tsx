@@ -8,11 +8,11 @@ const manrope = Manrope({ subsets: ["latin"], weight: ["200", "300", "400", "500
 const SITE_URL = "https://sunupower-grid-observer.vercel.app";
 const TITLE = "SunuPower Grid Observer";
 const DESCRIPTION =
-  "Interactive advisory map of Senegal's electricity transmission network — 225kV and 90kV backbones, MV grid, power plants, and SunuPower ESI sites across ECOWAS/Senegal.";
+  "Interactive advisory map of Senegal's electricity transmission network: 225kV and 90kV backbones, MV grid, power plants, and SunuPower ESI sites across ECOWAS/Senegal.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: `${TITLE} — Unified Infrastructure Advisor`, template: `%s | ${TITLE}` },
+  title: { default: `${TITLE}: Unified Infrastructure Advisor`, template: `%s | ${TITLE}` },
   description: DESCRIPTION,
   applicationName: TITLE,
   keywords: ["SunuPower", "Senegal", "electricity grid", "transmission network", "SENELEC", "OMVG", "ECOWAS", "energy infrastructure", "grid map"],
@@ -22,14 +22,14 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: TITLE,
-    title: `${TITLE} — Unified Infrastructure Advisor`,
+    title: `${TITLE}: Unified Infrastructure Advisor`,
     description: DESCRIPTION,
     images: [{ url: "/brand/full-logo.png", width: 1200, height: 630, alt: "SunuPower Grid Observer" }],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${TITLE} — Unified Infrastructure Advisor`,
+    title: `${TITLE}: Unified Infrastructure Advisor`,
     description: DESCRIPTION,
     images: ["/brand/full-logo.png"],
   },

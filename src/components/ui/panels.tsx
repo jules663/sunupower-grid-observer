@@ -1,8 +1,10 @@
 "use client";
 
-import { Activity, Shield } from "lucide-react";
+import { Activity, Shield, Gauge } from "lucide-react";
 import { SHOW_ESI_SITES } from "@/lib/config";
 import type { GridFilter } from "@/app/page";
+import type { EventConfidence } from "@/types/grid";
+import type { MeasuredIndex } from "@/lib/reliability";
 
 // Shared shape of the localized strings the panels need. page.tsx builds the
 // full translation object; these components consume the subset they use.
@@ -37,6 +39,24 @@ export interface PanelStrings {
   confReported: string;
   confModeled: string;
   relLegalNote: string;
+  // Confidence-tier meanings (methodology) + interactive-filter hint
+  confMeasuredDesc: string;
+  confReportedDesc: string;
+  confModeledDesc: string;
+  confFilterHint: string;
+  // Measured reliability indices (SAIFI / SAIDI) panel
+  indicesTitle: string;
+  saifiLabel: string;
+  saifiUnit: string;
+  saidiLabel: string;
+  saidiUnit: string;
+  indicesScope: string;
+  indicesNote: string;
+  indicesEmpty: string;
+  // Methodology / sources block (Context panel)
+  methTitle: string;
+  methUpdated: string;
+  methUpdatedDate: string;
 }
 
 // A single fuel/asset legend swatch. Shape is "dot" | "hex" | "diamond".
@@ -80,8 +100,13 @@ export function ContextPanel({ t, kmDisplay, nodeDisplay, loading }: { t: PanelS
             <span className="text-[10px] uppercase tracking-widest font-bold text-sunu-space">{t.nodes}</span>
           </div>
         </div>
-        <div className="border-t border-white/5 pt-4">
-          <span className="text-[11px] text-sunu-space leading-relaxed italic">{t.legal}</span>
+        <div className="border-t border-white/5 pt-4 space-y-2.5">
+          <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space">{t.methTitle}</div>
+          <span className="block text-[11px] text-sunu-space leading-relaxed italic">{t.legal}</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-sunu-space/70 pt-1">
+            <span className="uppercase tracking-wider font-bold">{t.methUpdated}</span>
+            <span className="font-mono">{t.methUpdatedDate}</span>
+          </div>
         </div>
       </div>
     </section>
@@ -166,14 +191,26 @@ export function Legend({ t, filter, setFilter }: { t: PanelStrings; filter?: Gri
   );
 }
 
-// Legend for reliability mode: the stress-score heat scale + the data-confidence
-// key, so a measured outage and a modeled constraint are never read as equal.
-export function ReliabilityLegend({ t }: { t: PanelStrings }) {
-  const confidences: { label: string; color: string }[] = [
-    { label: t.confMeasured, color: "#22C55E" },
-    { label: t.confReported, color: "#F59E0B" },
-    { label: t.confModeled, color: "#9DA2B3" },
-  ];
+// Confidence tiers, in evidence-strength order. Each carries a one-line meaning
+// so the map's honesty (measured vs estimated) is explicit, not implicit.
+const CONFIDENCE_TIERS: { value: EventConfidence; labelKey: keyof PanelStrings; descKey: keyof PanelStrings; color: string }[] = [
+  { value: "measured", labelKey: "confMeasured", descKey: "confMeasuredDesc", color: "#22C55E" },
+  { value: "reported", labelKey: "confReported", descKey: "confReportedDesc", color: "#F59E0B" },
+  { value: "modeled", labelKey: "confModeled", descKey: "confModeledDesc", color: "#9DA2B3" },
+];
+
+// Legend for reliability mode: the stress-score heat scale + an INTERACTIVE
+// data-confidence key. Clicking a tier toggles whether events of that confidence
+// heat the map, so a viewer can strip the map down to measured evidence. When
+// filter/onToggle are omitted the tiers render as a static key (with meanings).
+export function ReliabilityLegend({
+  t, confidenceFilter, onToggleConfidence,
+}: {
+  t: PanelStrings;
+  confidenceFilter?: Set<EventConfidence>;
+  onToggleConfidence?: (tier: EventConfidence) => void;
+}) {
+  const interactive = !!onToggleConfidence;
   return (
     <section aria-label={t.reliabilityTitle}>
       <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space mb-3 px-1 border-b border-white/5 pb-3">{t.relScale}</div>
@@ -188,16 +225,95 @@ export function ReliabilityLegend({ t }: { t: PanelStrings }) {
           <span className="text-[10px] uppercase tracking-wider font-bold text-sunu-space">{t.relBaseline}</span>
         </div>
       </div>
-      <div className="text-[10px] uppercase tracking-widest font-bold text-sunu-space mb-3 px-1 border-b border-white/5 pb-3">{t.confidenceTitle}</div>
-      <div className="flex flex-col gap-2 mb-3">
-        {confidences.map((c) => (
-          <div key={c.label} className="flex items-center gap-3">
-            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase" style={{ background: `${c.color}22`, color: c.color }}>{c.label}</span>
-          </div>
-        ))}
+      <div className="flex items-center justify-between mb-3 px-1 border-b border-white/5 pb-3">
+        <span className="text-[10px] uppercase tracking-widest font-bold text-sunu-space">{t.confidenceTitle}</span>
+        {interactive && <span className="text-[9px] text-sunu-space/70 italic normal-case tracking-normal">{t.confFilterHint}</span>}
+      </div>
+      <div className="flex flex-col gap-2 mb-3" role={interactive ? "group" : undefined} aria-label={interactive ? t.confidenceTitle : undefined}>
+        {CONFIDENCE_TIERS.map((c) => {
+          const label = t[c.labelKey];
+          const desc = t[c.descKey];
+          const active = !confidenceFilter || confidenceFilter.has(c.value);
+          const badge = (
+            <div className="flex items-start gap-2.5">
+              <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 mt-0.5" style={{ background: `${c.color}22`, color: c.color }}>{label}</span>
+              <span className="text-[10px] text-sunu-space leading-snug">{desc}</span>
+            </div>
+          );
+          return interactive ? (
+            <button
+              key={c.value}
+              type="button"
+              aria-pressed={active}
+              aria-label={label}
+              onClick={() => onToggleConfidence!(c.value)}
+              className={`text-left rounded py-0.5 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${active ? "opacity-100" : "opacity-35 hover:opacity-70"}`}
+            >
+              {badge}
+            </button>
+          ) : (
+            <div key={c.value}>{badge}</div>
+          );
+        })}
       </div>
       <div className="border-t border-white/5 pt-3">
         <span className="text-[10px] text-sunu-space leading-relaxed italic">{t.relLegalNote}</span>
+      </div>
+    </section>
+  );
+}
+
+// Measured reliability indices (SAIFI / SAIDI) for a scope, e.g. the Dakar
+// system. Shows the latest value + a compact trend across reporting periods,
+// with the scope and period always disclosed so these aggregate utility-grade
+// figures are never read as per-node precision. Reliability view only.
+export function MeasuredIndicesPanel({ t, series }: { t: PanelStrings; series: MeasuredIndex[] }) {
+  if (series.length === 0) {
+    return (
+      <section aria-label={t.indicesTitle}>
+        <div className="text-[11px] uppercase tracking-[0.3em] text-sunu-space font-bold mb-4 border-b border-white/5 pb-3 flex items-center gap-2">
+          <Gauge className="w-3.5 h-3.5 text-sunu-blue" aria-hidden="true" />{t.indicesTitle}
+        </div>
+        <span className="text-[11px] text-sunu-space italic">{t.indicesEmpty}</span>
+      </section>
+    );
+  }
+  const latest = series[series.length - 1];
+  const history = series.slice(0, -1).slice(-3); // up to 3 prior periods
+  const fmt = (n: number | undefined, d = 0) => n == null ? "n/a" : n.toFixed(d);
+  return (
+    <section aria-label={t.indicesTitle}>
+      <div className="text-[11px] uppercase tracking-[0.3em] text-sunu-space font-bold mb-4 border-b border-white/5 pb-3 flex items-center gap-2">
+        <Gauge className="w-3.5 h-3.5 text-sunu-blue" aria-hidden="true" />{t.indicesTitle}
+      </div>
+      <div className="flex items-baseline justify-between mb-1">
+        <span className="text-[10px] uppercase tracking-wider font-bold text-sunu-space">{latest.scope}</span>
+        <span className="text-[10px] font-mono text-sunu-space">{latest.period}</span>
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="flex flex-col">
+          <span className="text-2xl font-mono text-sunu-cloud leading-none">{fmt(latest.saifi, 2)}</span>
+          <span className="text-[9px] uppercase tracking-wider font-bold text-sunu-space mt-1">{t.saifiLabel}</span>
+          <span className="text-[9px] text-sunu-space/70">{t.saifiUnit}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-2xl font-mono text-sunu-cloud leading-none">{fmt(latest.saidi_min, 0)}</span>
+          <span className="text-[9px] uppercase tracking-wider font-bold text-sunu-space mt-1">{t.saidiLabel}</span>
+          <span className="text-[9px] text-sunu-space/70">{t.saidiUnit}</span>
+        </div>
+      </div>
+      {history.length > 0 && (
+        <div className="flex flex-col gap-1 mb-3 border-t border-white/5 pt-2">
+          {history.map((h) => (
+            <div key={h.period} className="flex items-center justify-between text-[10px]">
+              <span className="text-sunu-space/70 font-mono">{h.period}</span>
+              <span className="text-sunu-space font-mono">SAIFI {fmt(h.saifi, 2)} · SAIDI {fmt(h.saidi_min, 0)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="border-t border-white/5 pt-3">
+        <span className="text-[10px] text-sunu-space leading-relaxed italic">{t.indicesNote}</span>
       </div>
     </section>
   );

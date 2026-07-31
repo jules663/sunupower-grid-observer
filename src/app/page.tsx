@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Info, Layers, CalendarClock } from "lucide-react";
@@ -8,16 +8,59 @@ import type { GridStats } from "@/components/map/GridMap";
 import { ContextPanel, Legend, ReliabilityLegend, MeasuredIndicesPanel } from "@/components/ui/panels";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { GridActivityFeed, type FeedStrings } from "@/components/ui/GridActivityFeed";
-import type { EventConfidence } from "@/types/grid";
+import type { EventConfidence, EventSeverity } from "@/types/grid";
 import type { MeasuredIndex } from "@/lib/reliability";
-import { GridDataProvider } from "@/lib/GridDataContext";
+import { GridDataProvider, useGridData } from "@/lib/GridDataContext";
+import { useUrlState, type UrlState } from "@/lib/useUrlState";
+import { summarizeActivity } from "@/lib/feed";
 
 const GridMap = dynamic(() => import("@/components/map/GridMap"), {
   ssr: false,
 });
 
-export type GridFilter = "ALL" | "225" | "90" | "MV";
-export type ViewMode = "infrastructure" | "reliability";
+// Canonical definitions now live in @/types/grid so shared modules can reference
+// them without importing from a route file. Re-exported here for existing imports.
+export type { GridFilter, ViewMode } from "@/types/grid";
+import type { GridFilter, ViewMode } from "@/types/grid";
+
+// Defaults, also used to keep the URL clean (a value equal to its default is
+// omitted from the query string).
+const URL_DEFAULTS: UrlState = { lang: "EN", filter: "ALL", view: "reliability" };
+
+// Severity → badge color, matching the feed's own severity palette.
+const BADGE_COLOR: Record<EventSeverity, string> = {
+  low: "#FACC15",
+  medium: "#F59E0B",
+  high: "#F97316",
+  critical: "#EF4444",
+};
+
+// Count pill on the Activity button. Rendered only when something is actually in
+// progress, so an empty badge never implies activity that isn't there.
+//
+// `severity` is null when everything currently in progress is a persistent
+// constraint. In that case the badge stays neutral graphite and does not pulse:
+// the count is still worth showing, but a long-standing structural limit should
+// not be dressed up as a live alarm.
+function ActivityBadge({ count, severity }: { count: number; severity: EventSeverity | null }) {
+  if (count <= 0) return null;
+  const color = severity ? BADGE_COLOR[severity] : "#9DA2B3";
+  const urgent = severity === "high" || severity === "critical";
+  return (
+    <span
+      aria-hidden="true"
+      className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none tabular-nums"
+      style={{
+        background: color,
+        color: "#0E0E12",
+        boxShadow: `0 0 10px ${color}99`,
+        animation: urgent ? "activity-badge-pulse 2.4s ease-in-out infinite" : undefined,
+      }}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
 
 // The provider wraps the page so GridMap and GridActivityFeed share one fetch of
 // the static datasets instead of each running their own waterfall.
@@ -30,9 +73,26 @@ export default function Home() {
 }
 
 function HomeContent() {
-  const [lang, setLang] = useState<"EN" | "FR">("EN");
-  const [filter, setFilter] = useState<GridFilter>("ALL");
-  const [view, setView] = useState<ViewMode>("reliability");
+  const [lang, setLang] = useState<"EN" | "FR">(URL_DEFAULTS.lang);
+  const [filter, setFilter] = useState<GridFilter>(URL_DEFAULTS.filter);
+  const [view, setView] = useState<ViewMode>(URL_DEFAULTS.view);
+
+  // Persist view/filter/lang in the query string so a refresh keeps the current
+  // view and a shared link opens the same one.
+  const applyUrlState = useCallback((s: Partial<UrlState>) => {
+    if (s.lang) setLang(s.lang);
+    if (s.filter) setFilter(s.filter);
+    if (s.view) setView(s.view);
+  }, []);
+  useUrlState({ lang, filter, view }, applyUrlState, URL_DEFAULTS);
+
+  // Live-event count for the Activity button badge.
+  const { data: gridData } = useGridData();
+  const activity = useMemo(
+    () => summarizeActivity(gridData.outageEvents ?? null, gridData.maintenanceEvents ?? null),
+    [gridData.outageEvents, gridData.maintenanceEvents],
+  );
+
   const [mobilePanel, setMobilePanel] = useState<null | "context" | "legend">(null);
   const [stats, setStats] = useState<GridStats | null>(null);
   const [feedOpen, setFeedOpen] = useState(false);
@@ -165,6 +225,7 @@ function HomeContent() {
       customersAffected: "customers",
       filtersLabel: "Filter events by type",
       feedClose: "Close activity feed",
+      activeNow: "events in progress",
     },
     FR: {
       title: "Observateur de Réseau",
@@ -238,6 +299,7 @@ function HomeContent() {
       customersAffected: "clients",
       filtersLabel: "Filtrer les évènements par type",
       feedClose: "Fermer le flux d'activité",
+      activeNow: "évènements en cours",
     },
   }[lang];
 
@@ -270,6 +332,20 @@ function HomeContent() {
 
   return (
     <main className="flex flex-col h-screen w-full bg-sunu-phantom overflow-hidden">
+      {/* Badge pulse for high/critical live events. Respects reduced-motion —
+          the color already carries the severity, so the animation is optional. */}
+      <style jsx global>{`
+        @keyframes activity-badge-pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%      { transform: scale(1.14); opacity: 0.82; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes activity-badge-pulse {
+            0%, 100% { transform: none; opacity: 1; }
+          }
+        }
+      `}</style>
+
       {/* Skip link for keyboard users */}
       <a
         href="#grid-map"
@@ -299,14 +375,15 @@ function HomeContent() {
             type="button"
             onClick={() => setFeedOpen((v) => !v)}
             aria-expanded={feedOpen}
-            aria-label={t.feedTitle}
-            className={`flex items-center justify-center w-10 h-10 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
+            aria-label={activity.count > 0 ? `${t.feedTitle} — ${activity.count} ${t.activeNow}` : t.feedTitle}
+            className={`relative flex items-center justify-center w-10 h-10 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
               feedOpen
                 ? "bg-sunu-blue/15 border-sunu-blue/50 text-sunu-blue"
                 : "bg-white/[0.03] border-white/10 text-sunu-cloud hover:border-sunu-blue"
             }`}
           >
             <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
+            <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
           </button>
           <button
             type="button"
@@ -329,8 +406,8 @@ function HomeContent() {
             type="button"
             onClick={() => setFeedOpen((v) => !v)}
             aria-expanded={feedOpen}
-            aria-label={t.feedTitle}
-            className={`flex items-center gap-2 px-4 py-2 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
+            aria-label={activity.count > 0 ? `${t.feedTitle} — ${activity.count} ${t.activeNow}` : t.feedTitle}
+            className={`relative flex items-center gap-2 px-4 py-2 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
               feedOpen
                 ? "bg-sunu-blue/15 border-sunu-blue/50 text-sunu-blue"
                 : "bg-white/[0.03] border-white/10 text-sunu-cloud hover:border-sunu-blue hover:bg-white/[0.08]"
@@ -338,6 +415,7 @@ function HomeContent() {
           >
             <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
             <span className="text-[11px] font-bold uppercase tracking-wider">{t.activityBtn}</span>
+            <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
           </button>
           <button
             type="button"

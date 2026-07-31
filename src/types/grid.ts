@@ -6,6 +6,13 @@
 
 export type Coordinate = [number, number]; // [lon, lat]
 
+// --- UI view state ---
+// Defined here rather than in the page component so that shared modules (the URL
+// state hook, the map) can reference them without importing from a route file.
+export type GridFilter = "ALL" | "225" | "90" | "MV";
+export type ViewMode = "infrastructure" | "reliability";
+export type Lang = "EN" | "FR";
+
 export interface FeatureCollection<G, P> {
   type: "FeatureCollection";
   features: Feature<G, P>[];

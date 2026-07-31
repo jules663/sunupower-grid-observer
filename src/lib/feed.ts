@@ -140,6 +140,52 @@ export function buildFeedSections(
   return { ahead, current, past, totalMatched: matched.length };
 }
 
+// --- Activity badge summary ---------------------------------------------------
+// Headline count for the Activity button, so the panel advertises that there is
+// something to look at without being opened.
+//
+// Scope is deliberately "current" only — events actually in progress right now.
+// Counting the whole history would produce a large static number that stops
+// carrying information, and counting upcoming maintenance would imply urgency
+// that a scheduled job next month doesn't have. Zero current events means no
+// badge, which is the honest signal.
+//
+// Urgency is computed separately from the count, and constraints are excluded
+// from it. A constraint is a persistent structural condition (a substation that
+// has been capacity-limited for two years) — real, worth surfacing in the count,
+// but it is not a live incident and must not drive an alarm treatment. Only an
+// in-progress outage or maintenance job sets `worstSeverity`, so the badge only
+// escalates visually when something is genuinely happening now.
+
+export interface ActivitySummary {
+  /** Events in progress, including persistent constraints. */
+  count: number;
+  /** Worst severity among live outage/maintenance only; null if those are absent. */
+  worstSeverity: EventSeverity | null;
+  /** How many of `count` are persistent constraints rather than live incidents. */
+  constraintCount: number;
+}
+
+const SEVERITY_ORDER: EventSeverity[] = ["low", "medium", "high", "critical"];
+
+export function summarizeActivity(
+  outage: EventCollection | null,
+  maintenance: EventCollection | null,
+  now: Date = new Date(),
+): ActivitySummary {
+  const current = buildFeedEvents(outage, maintenance, new Map(), now)
+    .filter((e) => e.bucket === "current");
+
+  let worst: EventSeverity | null = null;
+  let constraintCount = 0;
+  for (const e of current) {
+    if (e.props.event_type === "constraint") { constraintCount += 1; continue; }
+    const s = e.props.severity;
+    if (worst == null || SEVERITY_ORDER.indexOf(s) > SEVERITY_ORDER.indexOf(worst)) worst = s;
+  }
+  return { count: current.length, worstSeverity: worst, constraintCount };
+}
+
 // Convenience: the default "everything on" filter state.
 export function defaultFilters(): FeedFilters {
   return {

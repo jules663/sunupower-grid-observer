@@ -29,6 +29,11 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  // Explicit same-origin CORS posture: cross-origin scripts cannot read responses.
+  // Matches the app's design (all data is fetched by its own client bundle, not by
+  // third-party origins). Tighten to a named allow-list if an external consumer
+  // ever needs programmatic access to the /data files.
+  { key: "Access-Control-Allow-Origin", value: "https://sunupower-grid-observer.vercel.app" },
 ];
 
 const nextConfig = {

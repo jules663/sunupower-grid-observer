@@ -10,6 +10,7 @@ import { ViewToggle } from "@/components/ui/ViewToggle";
 import { GridActivityFeed, type FeedStrings } from "@/components/ui/GridActivityFeed";
 import type { EventConfidence } from "@/types/grid";
 import type { MeasuredIndex } from "@/lib/reliability";
+import { GridDataProvider } from "@/lib/GridDataContext";
 
 const GridMap = dynamic(() => import("@/components/map/GridMap"), {
   ssr: false,
@@ -18,7 +19,17 @@ const GridMap = dynamic(() => import("@/components/map/GridMap"), {
 export type GridFilter = "ALL" | "225" | "90" | "MV";
 export type ViewMode = "infrastructure" | "reliability";
 
+// The provider wraps the page so GridMap and GridActivityFeed share one fetch of
+// the static datasets instead of each running their own waterfall.
 export default function Home() {
+  return (
+    <GridDataProvider>
+      <HomeContent />
+    </GridDataProvider>
+  );
+}
+
+function HomeContent() {
   const [lang, setLang] = useState<"EN" | "FR">("EN");
   const [filter, setFilter] = useState<GridFilter>("ALL");
   const [view, setView] = useState<ViewMode>("reliability");

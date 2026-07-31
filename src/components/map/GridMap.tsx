@@ -6,11 +6,12 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { GridFilter, ViewMode } from "@/app/page";
 import type {
-  GridData, LineFeature, LineProps, NodeFeature, NodeProps,
+  LineFeature, LineProps, NodeFeature, NodeProps,
   EsiProps, Coordinate, LineCollection, EventCollection, ReliabilityProfile, EventConfidence,
 } from "@/types/grid";
 import { computeReliability, heatColor, heatRadius, availableYears, measuredIndicesByScope, type YearFilter, type MeasuredIndex } from "@/lib/reliability";
 import { SHOW_ESI_SITES } from "@/lib/config";
+import { useGridData } from "@/lib/GridDataContext";
 
 // Popups live in a pane that is a direct child of .leaflet-container, NOT inside
 // .leaflet-map-pane. Reason: .leaflet-map-pane has a CSS transform which creates
@@ -182,47 +183,11 @@ interface Props {
 }
 
 export default function GridMap({ lang, filter, view, onStats, focusAsset, focusNonce, confidenceFilter, onIndices }: Props) {
-  const [data, setData] = useState<GridData>({ grid: null, plants: null, regionalGrid: null, regionalNodes: null, tieLines: null, consumers: null, esiSites: null, outageEvents: null, maintenanceEvents: null });
-  const [loadError, setLoadError] = useState<boolean>(false);
-  const [senegalBorder, setSenegalBorder] = useState<GeoJSON.Feature | null>(null);
+  // Datasets come from the shared provider (see src/lib/GridDataContext.tsx) so
+  // the map and the activity feed read the same objects from a single fetch.
+  const { data, border: senegalBorder, error: loadError } = useGridData();
 
-  useEffect(() => {
-    setupIcons();
-    const urls: Partial<Record<keyof GridData, string>> = {
-      grid: "/data/senegal-grid.json",
-      plants: "/data/senegal-plants.json",
-      regionalGrid: "/data/regional-interconnections.json",
-      regionalNodes: "/data/regional-nodes.json",
-      tieLines: "/data/infrastructure-tie-lines.json",
-      consumers: "/data/industrial-consumers.json",
-      outageEvents: "/data/outage-events.json",
-      maintenanceEvents: "/data/maintenance-events.json",
-    };
-    // ESI sites are simulated placeholders — only fetched when the layer is
-    // enabled (see src/lib/config.ts), so simulated data isn't even served.
-    if (SHOW_ESI_SITES) urls.esiSites = "/data/sunupower-esi-sites.json";
-
-    Promise.all(Object.entries(urls).map(([key, url]) =>
-      fetch(url).then(r => {
-        if (!r.ok) throw new Error(`Failed to load ${url}: ${r.status}`);
-        return r.json();
-      }).then(d => [key, d] as [keyof GridData, unknown])
-    )).then(results => {
-      const newData = {} as Record<keyof GridData, unknown>;
-      results.forEach(([k, v]) => { newData[k] = v; });
-      setLoadError(false);
-      setData(newData as unknown as GridData);
-    }).catch((err) => {
-      console.error("GridMap data load failed:", err);
-      setLoadError(true);
-    });
-
-    // National boundary outline — non-blocking; the map works without it.
-    fetch("/data/senegal-border.json")
-      .then(r => (r.ok ? r.json() : null))
-      .then(b => { if (b) setSenegalBorder(b); })
-      .catch(() => { /* boundary is decorative; ignore failure */ });
-  }, []);
+  useEffect(() => { setupIcons(); }, []);
 
   // Compute headline stats from the loaded data so the context panel can never
   // drift from what is actually rendered. Total trace km = sum of length_km
@@ -408,6 +373,48 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
     return { color: "#00F2FF", weight: 1.5 * wMul, opacity: 0.7 * op, className: relMode ? "" : "mv-line" };
   };
 
+  // Hover affordance for lines. Leaflet gives no default hover feedback on
+  // polylines, so a 250-point circuit and a 2-point stub read identically until
+  // clicked. On mouseover the line thickens, goes fully opaque, and is raised
+  // above its neighbours; a lightweight tooltip names the circuit so the network
+  // can be traced without opening a popup on every segment.
+  const HOVER_WEIGHT_BOOST = 2.5;
+
+  const attachHoverHighlight = (
+    layer: L.Layer, feature: GeoJSON.Feature, tooltipHtml: string,
+  ) => {
+    const path = layer as L.Path;
+    if (typeof path.setStyle !== "function") return;
+
+    const base = gridStyle(feature);
+
+    path.bindTooltip(tooltipHtml, {
+      sticky: true,
+      direction: "top",
+      opacity: 1,
+      className: "grid-line-tooltip",
+    });
+
+    path.on("mouseover", () => {
+      path.setStyle({
+        weight: (base.weight ?? 2) + HOVER_WEIGHT_BOOST,
+        opacity: 1,
+      });
+      // Raise above sibling lines so the highlight isn't hidden at crossings.
+      if (typeof path.bringToFront === "function") path.bringToFront();
+    });
+
+    path.on("mouseout", () => {
+      path.setStyle({ weight: base.weight, opacity: base.opacity });
+    });
+
+    // A popup opening moves focus to the popup; reset the highlight so a line
+    // isn't left permanently thickened after the pointer has gone.
+    path.on("popupclose", () => {
+      path.setStyle({ weight: base.weight, opacity: base.opacity });
+    });
+  };
+
   const onEachGridFeature = (feature: GeoJSON.Feature, layer: L.Layer) => {
     if (feature.properties) {
       const props = feature.properties as LineProps;
@@ -437,6 +444,20 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
           </div>
         </div>
       `, { className: 'custom-popup', pane: 'popupAboveAll' });
+
+      // Hover tooltip: voltage tier + the route where from/to are known, plus
+      // length. Deliberately terser than the popup — enough to trace a circuit
+      // at a glance without clicking.
+      const dot = v === 225 ? (isCrossBorder(props) ? "#A78BFA" : "#2579fc") : v === 90 ? "#FDA206" : "#00F2FF";
+      const route = props.from && props.to ? `${esc(props.from)} → ${esc(props.to)}` : "";
+      const tooltipHtml = `
+        <span class="grid-line-tooltip-dot" style="background:${dot};box-shadow:0 0 6px ${dot}AA;"></span>
+        <span class="grid-line-tooltip-body">
+          <span class="grid-line-tooltip-title">${title}</span>
+          ${route ? `<span class="grid-line-tooltip-meta">${route}</span>` : ""}
+          <span class="grid-line-tooltip-meta">${esc(voltage_kV)} kV · ${lengthDisplay} km</span>
+        </span>`;
+      attachHoverHighlight(layer, feature, tooltipHtml);
     }
   };
 
@@ -616,6 +637,32 @@ export default function GridMap({ lang, filter, view, onStats, focusAsset, focus
         .custom-popup .leaflet-popup-content-wrapper { background: rgba(14, 14, 18, 0.48) !important; backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important; -webkit-backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important; color: #EDEFF7 !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.10) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07) !important; }
         .custom-popup .leaflet-popup-tip { background: rgba(14, 14, 18, 0.48) !important; backdrop-filter: blur(14px) !important; border: 1px solid rgba(255, 255, 255, 0.10) !important; box-shadow: none !important; }
         .leaflet-popup-content { margin: 16px 20px !important; width: auto !important; min-width: 220px; }
+        /* Line hover tooltip — same frosted-glass language as the popups but
+           lighter, so tracing a circuit never feels as heavy as clicking one. */
+        .grid-line-tooltip {
+          background: rgba(14,14,18,0.60) !important;
+          backdrop-filter: blur(12px) saturate(160%);
+          -webkit-backdrop-filter: blur(12px) saturate(160%);
+          border: 1px solid rgba(255,255,255,0.10) !important;
+          border-radius: 8px !important;
+          box-shadow: 0 6px 22px rgba(0,0,0,0.35) !important;
+          color: #EDEFF7 !important;
+          padding: 7px 10px !important;
+          font-family: inherit !important;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+        .grid-line-tooltip::before { display: none !important; }
+        .grid-line-tooltip-dot {
+          display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+          margin-right: 7px; vertical-align: 3px;
+        }
+        .grid-line-tooltip-body { display: inline-flex; flex-direction: column; gap: 1px; vertical-align: middle; }
+        .grid-line-tooltip-title {
+          font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em;
+          font-weight: 700; color: #9DA2B3;
+        }
+        .grid-line-tooltip-meta { font-size: 11px; color: #EDEFF7; font-weight: 600; }
       `}</style>
       {/* keyboard enables arrow-key pan and +/- zoom for non-mouse users */}
       <MapContainer center={[13.8, -13.5] as any} zoom={7} scrollWheelZoom={true} keyboard={true} zoomControl={false} zoomSnap={0.25} zoomDelta={0.5} wheelDebounceTime={40} wheelPxPerZoomLevel={100} className="w-full h-full">

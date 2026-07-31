@@ -101,7 +101,9 @@ function matchesFilters(e: FeedEvent, f: FeedFilters): boolean {
 
   const q = f.query.trim().toLowerCase();
   if (q) {
-    const hay = `${e.assetName} ${p.cause ?? ""} ${p.source ?? ""} ${p.event_type}`.toLowerCase();
+    // Include asset_ref slug so queries like "hann-substation" also match.
+    // Include severity so "high", "critical" etc. are searchable.
+    const hay = `${e.assetName} ${p.asset_ref} ${p.cause ?? ""} ${p.source ?? ""} ${p.event_type} ${p.severity}`.toLowerCase();
     if (!hay.includes(q)) return false;
   }
   return true;

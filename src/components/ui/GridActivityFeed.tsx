@@ -6,20 +6,19 @@
 // outage/constraint incidents are present but visually secondary and can be
 // collapsed. Search + filters answer "query old events".
 //
-// The panel fetches the same static event files the map uses (browser-cached),
-// plus the node/plant files to resolve asset_ref → display name, so a card never
-// shows a bare slug. Honest-provenance posture is preserved: every card shows the
-// confidence tier and source verbatim.
+// The panel reads events and the asset_ref → display-name lookup from the shared
+// data provider (src/lib/GridDataContext.tsx), so a card never shows a bare slug
+// and the same fetch serves both the map and this feed. Honest-provenance posture
+// is preserved: every card shows the confidence tier and source verbatim.
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { X, Search, CalendarClock, Radio, History, Wrench, Zap, ChevronDown } from "lucide-react";
-import type {
-  EventCollection, EventType, EventSeverity, EventConfidence, NodeCollection,
-} from "@/types/grid";
+import type { EventType, EventSeverity, EventConfidence } from "@/types/grid";
 import {
   buildFeedEvents, buildFeedSections, defaultFilters,
   type FeedEvent, type FeedFilters,
 } from "@/lib/feed";
+import { useGridData } from "@/lib/GridDataContext";
 
 export interface FeedStrings {
   feedTitle: string;
@@ -192,39 +191,13 @@ export function GridActivityFeed({
   onFocusAsset?: (assetRef: string) => void;
 }) {
   const s = strings;
-  const [outage, setOutage] = useState<EventCollection | null>(null);
-  const [maintenance, setMaintenance] = useState<EventCollection | null>(null);
-  const [assetNames, setAssetNames] = useState<Map<string, string>>(new Map());
+  // Events and the asset-name lookup come from the shared provider — one fetch
+  // serves both this panel and the map.
+  const { data, loaded: dataLoaded, assetNames } = useGridData();
+  const outage = data.outageEvents ?? null;
+  const maintenance = data.maintenanceEvents ?? null;
   const [filters, setFilters] = useState<FeedFilters>(defaultFilters());
   const [showIncidents, setShowIncidents] = useState(true);
-
-  // Load events + asset-name lookup once (browser-cached from the map's own fetch).
-  useEffect(() => {
-    let cancelled = false;
-    const nameFiles = [
-      "/data/senegal-plants.json",
-      "/data/regional-nodes.json",
-      "/data/industrial-consumers.json",
-    ];
-    Promise.all([
-      fetch("/data/outage-events.json").then((r) => r.json()).catch(() => null),
-      fetch("/data/maintenance-events.json").then((r) => r.json()).catch(() => null),
-      ...nameFiles.map((u) => fetch(u).then((r) => r.json()).catch(() => null)),
-    ]).then(([o, m, ...nodeColls]) => {
-      if (cancelled) return;
-      setOutage(o as EventCollection | null);
-      setMaintenance(m as EventCollection | null);
-      const names = new Map<string, string>();
-      (nodeColls as (NodeCollection | null)[]).forEach((fc) => {
-        (fc?.features ?? []).forEach((f) => {
-          const p = f.properties;
-          if (p.id && p.name) names.set(p.id, p.name);
-        });
-      });
-      setAssetNames(names);
-    });
-    return () => { cancelled = true; };
-  }, []);
 
   // Keep the feed's year scope in sync with the map's time slider.
   useEffect(() => {
@@ -254,7 +227,8 @@ export function GridActivityFeed({
     { t: "constraint", label: s.typeConstraint },
   ];
 
-  const empty = sections.totalMatched === 0;
+  const loading = !dataLoaded;
+  const empty = !loading && sections.totalMatched === 0;
   const hasFilterOrQuery = filters.query.trim().length > 0 || filters.types.size < 3;
 
   return (
@@ -299,6 +273,7 @@ export function GridActivityFeed({
               onChange={(e) => setQuery(e.target.value)}
               placeholder={s.searchPlaceholder}
               aria-label={s.searchPlaceholder}
+              maxLength={200}
               className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-[13px] text-sunu-cloud placeholder:text-sunu-graphite/70 focus:outline-none focus:border-sunu-blue/60 transition-colors"
             />
           </div>
@@ -337,7 +312,12 @@ export function GridActivityFeed({
 
         {/* Scrollable feed */}
         <div className="flex-1 overflow-y-auto px-5 pt-0 pb-4 min-h-0">
-          {empty ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-6" role="status" aria-live="polite">
+              <div className="w-6 h-6 rounded-full border-2 border-white/15 border-t-sunu-blue animate-spin mb-3" aria-hidden="true" />
+              <p className="text-[12px] text-sunu-space">…</p>
+            </div>
+          ) : empty ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
               <CalendarClock className="w-8 h-8 text-sunu-graphite/50 mb-3" aria-hidden="true" />
               <p className="text-[12px] text-sunu-space">{hasFilterOrQuery ? s.noMatch : s.noEvents}</p>

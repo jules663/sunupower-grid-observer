@@ -1,6 +1,6 @@
 "use client";
 
-import type { GridFilter } from "@/app/page";
+import type { GridFilter } from "@/types/grid";
 
 interface FilterStrings {
   backbone: string;

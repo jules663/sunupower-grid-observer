@@ -1,7 +1,7 @@
 "use client";
 
 import { Network, Activity } from "lucide-react";
-import type { ViewMode } from "@/app/page";
+import type { ViewMode } from "@/types/grid";
 
 interface ViewStrings {
   viewInfra: string;

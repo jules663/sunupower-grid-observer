@@ -2,7 +2,7 @@
 
 import { Activity, Shield, Gauge } from "lucide-react";
 import { SHOW_ESI_SITES } from "@/lib/config";
-import type { GridFilter } from "@/app/page";
+import type { GridFilter } from "@/types/grid";
 import type { EventConfidence } from "@/types/grid";
 import type { MeasuredIndex } from "@/lib/reliability";
 

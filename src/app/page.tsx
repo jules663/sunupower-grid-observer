@@ -14,6 +14,7 @@ import { GridDataProvider, useGridData } from "@/lib/GridDataContext";
 import { useUrlState, type UrlState } from "@/lib/useUrlState";
 import { summarizeActivity } from "@/lib/feed";
 import { getTranslations } from "@/lib/translations";
+import { POLL_INTERVAL_MS } from "@/lib/GridDataContext";
 
 const GridMap = dynamic(() => import("@/components/map/GridMap"), {
   ssr: false,
@@ -43,6 +44,30 @@ const BADGE_COLOR: Record<EventSeverity, string> = {
 // constraint. In that case the badge stays neutral graphite and does not pulse:
 // the count is still worth showing, but a long-standing structural limit should
 // not be dressed up as a live alarm.
+// Animated dot indicating live-data status next to the Activity button.
+//   green + pulse  → data is fresh (updated within the last poll window)
+//   amber          → last poll failed; events may be stale
+//   hidden         → data not yet loaded
+function LivePulse({ lastUpdated, eventsError }: { lastUpdated: Date | null; eventsError: boolean }) {
+  if (!lastUpdated) return null;
+  if (eventsError) {
+    return (
+      <span
+        className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shrink-0"
+        title="Event data may be stale"
+        aria-hidden="true"
+      />
+    );
+  }
+  return (
+    <span
+      className="w-1.5 h-1.5 rounded-full bg-[#22C55E] shrink-0"
+      style={{ animation: "live-pulse 2.8s ease-in-out infinite" }}
+      aria-hidden="true"
+    />
+  );
+}
+
 function ActivityBadge({ count, severity }: { count: number; severity: EventSeverity | null }) {
   if (count <= 0) return null;
   const color = severity ? BADGE_COLOR[severity] : "#9DA2B3";
@@ -87,8 +112,8 @@ function HomeContent() {
   }, []);
   useUrlState({ lang, filter, view }, applyUrlState, URL_DEFAULTS);
 
-  // Live-event count for the Activity button badge.
-  const { data: gridData } = useGridData();
+  // Live-event count + polling state for the Activity button.
+  const { data: gridData, lastUpdated, eventsError } = useGridData();
   const activity = useMemo(
     () => summarizeActivity(gridData.outageEvents ?? null, gridData.maintenanceEvents ?? null),
     [gridData.outageEvents, gridData.maintenanceEvents],
@@ -180,21 +205,28 @@ function HomeContent() {
     confReported: t.confReported,
     confModeled: t.confModeled,
     locale: lang === "EN" ? "en-US" : "fr-FR",
+    updatedLabel: t.feedUpdated,
+    staleLabel: t.feedStale,
+    lastUpdated,
+    eventsError,
   };
 
   return (
     <main className="flex flex-col h-screen w-full bg-sunu-phantom overflow-hidden">
-      {/* Badge pulse for high/critical live events. Respects reduced-motion —
-          the color already carries the severity, so the animation is optional. */}
+      {/* Keyframes for badge urgency pulse and live-data dot. Both respect
+          prefers-reduced-motion: the color carries the meaning; motion is extra. */}
       <style jsx global>{`
         @keyframes activity-badge-pulse {
           0%, 100% { transform: scale(1); opacity: 1; }
           50%      { transform: scale(1.14); opacity: 0.82; }
         }
+        @keyframes live-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%      { opacity: 0.4; transform: scale(0.75); }
+        }
         @media (prefers-reduced-motion: reduce) {
-          @keyframes activity-badge-pulse {
-            0%, 100% { transform: none; opacity: 1; }
-          }
+          @keyframes activity-badge-pulse { 0%, 100% { transform: none; opacity: 1; } }
+          @keyframes live-pulse           { 0%, 100% { opacity: 1; } }
         }
       `}</style>
 
@@ -235,6 +267,7 @@ function HomeContent() {
             }`}
           >
             <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
+            <LivePulse lastUpdated={lastUpdated} eventsError={eventsError} />
             <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
           </button>
           <button
@@ -267,6 +300,7 @@ function HomeContent() {
           >
             <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
             <span className="text-[11px] font-bold uppercase tracking-wider">{t.activityBtn}</span>
+            <LivePulse lastUpdated={lastUpdated} eventsError={eventsError} />
             <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
           </button>
           <button

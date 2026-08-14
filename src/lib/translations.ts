@@ -81,6 +81,8 @@ export interface PageStrings {
   filtersLabel: string;
   feedClose: string;
   activeNow: string;
+  feedUpdated: string;
+  feedStale: string;
 }
 
 const EN: PageStrings = {
@@ -156,6 +158,8 @@ const EN: PageStrings = {
   filtersLabel: "Filter events by type",
   feedClose: "Close activity feed",
   activeNow: "events in progress",
+  feedUpdated: "Updated",
+  feedStale: "Events may be stale — retrying…",
 };
 
 const FR: PageStrings = {
@@ -231,6 +235,8 @@ const FR: PageStrings = {
   filtersLabel: "Filtrer les évènements par type",
   feedClose: "Fermer le flux d'activité",
   activeNow: "évènements en cours",
+  feedUpdated: "Mis à jour",
+  feedStale: "Données potentiellement obsolètes — nouvelle tentative…",
 };
 
 const TRANSLATIONS: Record<Lang, PageStrings> = { EN, FR };

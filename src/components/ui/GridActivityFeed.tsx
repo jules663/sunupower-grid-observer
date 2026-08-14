@@ -43,6 +43,11 @@ export interface FeedStrings {
   confReported: string;
   confModeled: string;
   locale: string;              // "en-US" | "fr-FR" for date formatting
+  // Live-data indicators
+  updatedLabel: string;        // "Updated" prefix for the last-poll timestamp
+  staleLabel: string;          // shown when the most recent poll failed
+  lastUpdated: Date | null;    // timestamp of last successful poll
+  eventsError: boolean;        // true when last poll failed
 }
 
 const SEVERITY_COLOR: Record<EventSeverity, string> = {
@@ -252,7 +257,15 @@ export function GridActivityFeed({
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-sm uppercase tracking-[0.22em] font-bold text-sunu-cloud leading-tight">{s.feedTitle}</h2>
-              <p className="text-[11px] text-sunu-space mt-1 leading-snug">{s.feedSubtitle}</p>
+                  <p className="text-[11px] text-sunu-space mt-1 leading-snug">{s.feedSubtitle}</p>
+                  {/* Last-updated timestamp — shows when events were last fetched */}
+                  <p className={`text-[10px] mt-1.5 font-mono ${s.eventsError ? "text-[#F59E0B]" : "text-sunu-graphite/70"}`}>
+                    {s.eventsError
+                      ? s.staleLabel
+                      : s.lastUpdated
+                        ? `${s.updatedLabel} ${s.lastUpdated.toLocaleTimeString(s.locale, { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })} UTC`
+                        : null}
+                  </p>
             </div>
             <button
               type="button"

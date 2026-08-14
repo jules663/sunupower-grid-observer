@@ -57,6 +57,14 @@ function classify(startMs: number, endMs: number | null, nowMs: number): FeedBuc
 // Build the full feed-ready event list from the raw collections. Constraint
 // events are persistent conditions with no meaningful end, so they are treated
 // as ongoing (current) unless they carry an explicit end in the past.
+// Parse an ISO date string to a Unix timestamp, or null if absent/unparseable.
+// Used for both start and end so both fields go through identical validation.
+function safeParse(s: string | null | undefined): number | null {
+  if (!s) return null;
+  const ms = new Date(s).getTime();
+  return isNaN(ms) ? null : ms;
+}
+
 export function buildFeedEvents(
   outage: EventCollection | null,
   maintenance: EventCollection | null,
@@ -71,10 +79,9 @@ export function buildFeedEvents(
 
   const out: FeedEvent[] = [];
   for (const p of raw) {
-    const startDate = new Date(p.start);
-    const startMs = startDate.getTime();
-    if (isNaN(startMs)) continue; // skip events with an unparseable start
-    const endMs = p.end ? (isNaN(new Date(p.end).getTime()) ? null : new Date(p.end).getTime()) : null;
+    const startMs = safeParse(p.start);
+    if (startMs == null) continue; // skip events with an absent or unparseable start
+    const endMs = safeParse(p.end);
     out.push({
       props: p,
       assetName: assetNames.get(p.asset_ref) ?? p.asset_ref,

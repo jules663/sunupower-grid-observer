@@ -328,16 +328,19 @@ function HomeContent() {
         />
 
         {/* Meta Stats Panel — desktop only. Reliability view adds the measured
-            SAIFI/SAIDI indicator below the regional context. */}
-        <div className="hidden lg:block absolute top-8 left-8 z-[2000] w-[340px] space-y-4 pointer-events-none max-h-[calc(100vh-4rem)] overflow-y-auto no-scrollbar">
-          <div className="glass-panel p-7 rounded-xl pointer-events-auto">
-            <ContextPanel t={t} kmDisplay={kmDisplay} nodeDisplay={nodeDisplay} loading={loading} />
-          </div>
-          {view === "reliability" && (
-            <div className="glass-panel p-7 rounded-xl pointer-events-auto">
-              <MeasuredIndicesPanel t={t} series={indexSeries} />
+            SAIFI/SAIDI indicator below the regional context. Both sections share
+            one glass panel so there is no visible seam between them. */}
+        <div className="hidden lg:block absolute top-8 left-8 z-[2000] w-[340px] pointer-events-none max-h-[calc(100vh-4rem)] overflow-y-auto no-scrollbar">
+          <div className="glass-panel rounded-xl pointer-events-auto">
+            <div className="p-7">
+              <ContextPanel t={t} kmDisplay={kmDisplay} nodeDisplay={nodeDisplay} loading={loading} />
             </div>
-          )}
+            {view === "reliability" && (
+              <div className="border-t border-white/[0.06] p-7">
+                <MeasuredIndicesPanel t={t} series={indexSeries} />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Legend Overlay — desktop only */}

@@ -27,7 +27,7 @@ import { lineStyle, passesVoltageFilter } from "@/lib/gridStyle";
 import { infrastructureIcon, reliabilityIcon } from "./markers";
 import {
   linePopupHtml, lineTooltipHtml, nodePopupHtml, reliabilityPopupHtml,
-  type AssetIndex,
+  type AssetIndex, type NearbyEvent,
 } from "./popupContent";
 
 const POPUP_OPTS = { className: "custom-popup", pane: "popupAboveAll" } as const;
@@ -38,7 +38,7 @@ const POPUP_OPTS = { className: "custom-popup", pane: "popupAboveAll" } as const
 const HOVER_WEIGHT_BOOST = 2.5;
 
 export function GridLayers({
-  data, filter, view, lang, s, reliability, indexByAsset, year, markersRef,
+  data, filter, view, lang, s, reliability, indexByAsset, nearbyByAsset, year, markersRef,
 }: {
   data: GridData;
   filter: GridFilter;
@@ -47,6 +47,7 @@ export function GridLayers({
   s: MapStrings;
   reliability: ReliabilityResult;
   indexByAsset: Map<string, AssetIndex>;
+  nearbyByAsset: Map<string, NearbyEvent[]>;
   year: YearFilter;
   markersRef: React.MutableRefObject<Map<string, L.Marker>>;
 }) {
@@ -111,13 +112,17 @@ export function GridLayers({
           p.id ? reliability.profiles.get(p.id) : undefined,
           p.id ? indexByAsset.get(p.id) : undefined,
           s,
+          p.id ? (nearbyByAsset.get(p.id) ?? []) : [],
         )
       : nodePopupHtml(p, s);
     layer.bindPopup(html, POPUP_OPTS);
   };
 
   const lineKey = `${filter}-${view}`;
-  const nodeKey = `${view}-${lang}-${year}`;
+  // nearbyByAsset.size is a cheap proxy for "did nearby events change"; avoids
+  // serialising the whole map into the key while still triggering a layer remount
+  // when the window shifts (e.g. on page reload after a maintenance window starts).
+  const nodeKey = `${view}-${lang}-${year}-${nearbyByAsset.size}`;
 
   return (
     <>

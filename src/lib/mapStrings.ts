@@ -36,6 +36,12 @@ export interface MapStrings {
   confidence: string;
   systemIndicator: string;
 
+  // Near-term activity block (±14 days)
+  nearTermHead: string;      // section header
+  nearTermAhead: string;     // "Upcoming" label
+  nearTermNow: string;       // "In progress" label
+  nearTermPlanned: string;   // "Planned" badge
+
   // Year slider
   period: string;
   allYears: string;
@@ -74,6 +80,10 @@ const EN: MapStrings = {
   worstSeverity: "Worst severity",
   confidence: "Confidence",
   systemIndicator: "System indicator",
+  nearTermHead: "ACTIVITY · ±14 DAYS",
+  nearTermAhead: "Upcoming",
+  nearTermNow: "In progress",
+  nearTermPlanned: "Planned",
 
   period: "Period",
   allYears: "All",
@@ -111,6 +121,10 @@ const FR: MapStrings = {
   worstSeverity: "Sévérité max",
   confidence: "Confiance",
   systemIndicator: "Indicateur système",
+  nearTermHead: "ACTIVITÉ · ±14 JOURS",
+  nearTermAhead: "À venir",
+  nearTermNow: "En cours",
+  nearTermPlanned: "Planifié",
 
   period: "Période",
   allYears: "Tout",

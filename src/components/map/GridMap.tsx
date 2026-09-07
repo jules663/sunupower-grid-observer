@@ -34,7 +34,7 @@ import { snapGridToNodes } from "@/lib/gridGeometry";
 import { mapStrings } from "@/lib/mapStrings";
 
 import { setupDefaultIcons } from "./markers";
-import type { AssetIndex } from "./popupContent";
+import type { AssetIndex, NearbyEvent } from "./popupContent";
 import { GridLayers } from "./GridLayers";
 import { PopupPaneSetup, LabelPaneSetup, MapFocusController, EsiLayer } from "./mapControllers";
 import { MapStyles } from "./MapStyles";
@@ -154,6 +154,46 @@ export default function GridMap({
     return m;
   }, [data.outageEvents]);
 
+  // Events within ±14 days of now, keyed by asset_ref. Pre-computed here so the
+  // popup builder in popupContent.ts stays a pure function with no date logic.
+  // Sorted soonest-first within each asset so the popup reads chronologically.
+  const nearbyByAsset = useMemo(() => {
+    const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+    const now = Date.now();
+    const m = new Map<string, NearbyEvent[]>();
+    const allFeatures = [
+      ...(data.outageEvents?.features ?? []),
+      ...(data.maintenanceEvents?.features ?? []),
+    ];
+    for (const f of allFeatures) {
+      const p = f.properties;
+      if (!p.asset_ref) continue;
+      const startMs = Date.parse(p.start);
+      if (isNaN(startMs)) continue;
+      // Include if: event starts within 14 days ahead, OR started within 14 days
+      // in the past and has no end / not yet ended.
+      const endMs = p.end ? Date.parse(p.end) : null;
+      const isOngoing = endMs == null || endMs >= now;
+      const startsWithinWindow = startMs >= now - WINDOW_MS && startMs <= now + WINDOW_MS;
+      if (!startsWithinWindow && !(isOngoing && startMs < now)) continue;
+      const entry: NearbyEvent = {
+        event_id: p.event_id,
+        event_type: p.event_type,
+        severity: p.severity,
+        cause: p.cause ?? undefined,
+        start: p.start,
+        end: p.end,
+        planned: p.planned,
+      };
+      const arr = m.get(p.asset_ref) ?? [];
+      arr.push(entry);
+      m.set(p.asset_ref, arr);
+    }
+    // Sort each asset's list: current first, then upcoming by start time.
+    m.forEach((arr) => arr.sort((a, b) => Date.parse(a.start) - Date.parse(b.start)));
+    return m;
+  }, [data.outageEvents, data.maintenanceEvents]);
+
   // Registry of node markers by asset id, populated as GridLayers builds them.
   // MapFocusController reads it to fly to an asset when a feed card is clicked.
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
@@ -210,6 +250,7 @@ export default function GridMap({
           s={s}
           reliability={reliability}
           indexByAsset={indexByAsset}
+          nearbyByAsset={nearbyByAsset}
           year={year}
           markersRef={markersRef}
         />

@@ -5,7 +5,7 @@
 // everything below returns a trusted HTML string, and every interpolated value
 // passes through esc() on the way in.
 
-import type { LineProps, NodeProps, EsiProps, Lang, ReliabilityProfile } from "@/types/grid";
+import type { LineProps, NodeProps, EsiProps, Lang, ReliabilityProfile, EventType, EventSeverity } from "@/types/grid";
 import type { MapStrings } from "@/lib/mapStrings";
 import { isCrossBorder, lineColor } from "@/lib/gridStyle";
 import { heatColor } from "@/lib/reliability";
@@ -138,6 +138,19 @@ export function nodePopupHtml(p: NodeProps, s: MapStrings): string {
 
 // --- Nodes (reliability view) -----------------------------------------------
 
+// A near-term event summary, pre-filtered to ±14 days of now by GridMap.
+// Only the fields needed for the popup row are carried — keeping this thin
+// avoids re-serialising the full EventProps into every popup HTML string.
+export interface NearbyEvent {
+  event_id: string;
+  event_type: EventType;
+  severity: EventSeverity;
+  cause?: string;
+  start: string;   // ISO 8601 — used to derive "ahead" vs "current"
+  end?: string | null;
+  planned?: boolean;
+}
+
 export interface AssetIndex {
   saifi?: number;
   saidi_min?: number;
@@ -146,17 +159,42 @@ export interface AssetIndex {
   start: string;
 }
 
+const SEVERITY_DOT: Record<EventSeverity, string> = {
+  low: "#FACC15",
+  medium: "#F59E0B",
+  high: "#F97316",
+  critical: "#EF4444",
+};
+
+// Format an ISO date as "DD MMM · HH:MM UTC", compact enough for a popup row.
+function fmtDate(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()];
+  const hh  = String(d.getUTCHours()).padStart(2, "0");
+  const mm  = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${day} ${mon} · ${hh}:${mm} UTC`;
+}
+
 export function reliabilityPopupHtml(
   p: NodeProps,
   profile: ReliabilityProfile | undefined,
   index: AssetIndex | undefined,
   s: MapStrings,
+  nearby: NearbyEvent[] = [],
+  nowMs: number = Date.now(),
 ): string {
+  // Near-term activity block — rendered for both profiled and no-profile nodes
+  // so a node with zero historic events still shows its upcoming maintenance.
+  const nearHtml = buildNearTermHtml(nearby, s, nowMs);
+
   if (!profile) {
     return `<div class="font-sans p-2">
       ${head(s.reliabilityHead)}
       <div class="text-sm font-bold text-[#EDEFF7]">${esc(p.name)}</div>
       <div class="text-[11px] mt-2 text-sunu-space">${s.noEvents}</div>
+      ${nearHtml}
     </div>`;
   }
 
@@ -198,10 +236,47 @@ export function reliabilityPopupHtml(
     </div>
     <div class="mt-3 space-y-1.5 border-t border-white/5 pt-2">${rowsHtml}</div>
     ${indexHtml}
+    ${nearHtml}
     <div class="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
       <span class="text-[9px] text-sunu-graphite uppercase font-bold">${s.confidence}</span>${badge}
     </div>
   </div>`;
+}
+
+// Build the ±14-day activity block. Returns an empty string when there are no
+// nearby events so no visual gap appears for quiet assets.
+function buildNearTermHtml(events: NearbyEvent[], s: MapStrings, nowMs: number): string {
+  if (events.length === 0) return "";
+
+  const rows = events.map((e) => {
+    const startMs = new Date(e.start).getTime();
+    const isAhead = startMs > nowMs;
+    const statusLabel = isAhead ? s.nearTermAhead : s.nearTermNow;
+    const dot = SEVERITY_DOT[e.severity] ?? "#9DA2B3";
+    const plannedBadge = e.planned
+      ? `<span style="background:rgba(255,255,255,0.06);color:#9DA2B3;" class="text-[8px] px-1 py-0.5 rounded font-bold uppercase ml-1">${esc(s.nearTermPlanned)}</span>`
+      : "";
+    const typeTag = e.event_type === "maintenance" ? "🔧" : "⚡";
+    return `
+      <div class="flex items-start gap-2 py-1.5 border-b border-white/[0.04] last:border-0">
+        <span style="background:${dot};width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0;box-shadow:0 0 5px ${dot}99;"></span>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1 flex-wrap">
+            <span class="text-[9px] uppercase tracking-wider font-bold" style="color:${dot};">${esc(statusLabel)}</span>
+            <span class="text-[9px] text-sunu-graphite">${typeTag} ${esc(e.event_type)}</span>
+            ${plannedBadge}
+          </div>
+          ${e.cause ? `<div class="text-[10px] text-sunu-cloud leading-snug mt-0.5 truncate">${esc(e.cause)}</div>` : ""}
+          <div class="text-[9px] text-sunu-graphite font-mono mt-0.5">${fmtDate(e.start)}</div>
+        </div>
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="mt-3 pt-2 border-t border-white/5">
+      <div class="text-[9px] uppercase tracking-widest font-bold text-sunu-graphite mb-1">${esc(s.nearTermHead)}</div>
+      ${rows}
+    </div>`;
 }
 
 // --- ESI sites --------------------------------------------------------------

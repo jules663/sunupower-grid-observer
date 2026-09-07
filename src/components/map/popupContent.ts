@@ -266,7 +266,7 @@ function buildNearTermHtml(events: NearbyEvent[], s: MapStrings, nowMs: number):
             <span class="text-[9px] text-sunu-graphite">${typeTag} ${esc(e.event_type)}</span>
             ${plannedBadge}
           </div>
-          ${e.cause ? `<div class="text-[10px] text-sunu-cloud leading-snug mt-0.5 truncate">${esc(e.cause)}</div>` : ""}
+          ${e.cause ? `<div class="text-[10px] text-sunu-cloud leading-snug mt-0.5 break-words">${esc(e.cause)}</div>` : ""}
           <div class="text-[9px] text-sunu-graphite font-mono mt-0.5">${fmtDate(e.start)}</div>
         </div>
       </div>`;

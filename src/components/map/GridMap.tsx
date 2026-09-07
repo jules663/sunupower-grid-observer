@@ -41,6 +41,23 @@ import { MapStyles } from "./MapStyles";
 import { YearSlider } from "./YearSlider";
 import { MapStatusOverlay } from "./MapStatusOverlay";
 
+// Stadia Maps tile URL. NEXT_PUBLIC_ variables are inlined at build time by
+// Next.js and intentionally visible in the browser bundle — correct for a tile
+// key whose access is controlled by domain allowlisting on the Stadia dashboard
+// (client.stadiamaps.com), not by key secrecy.
+// On Vercel: add as a "Config" (not "Secret") env var — the NEXT_PUBLIC_ prefix
+// requires Config type because the value is embedded in the client bundle.
+//
+// &v=1 is a cache-bust suffix. Safari aggressively caches tile images from
+// previous deployments (before the API key was set) and serves stale watermarked
+// tiles even after redeployment. Appending a version query param produces a URL
+// Safari has never cached, forcing a fresh fetch with the key present.
+// Increment v= here whenever the tile provider or key changes.
+const _stadiaKey = process.env.NEXT_PUBLIC_STADIA_API_KEY;
+const STADIA_TILE_URL =
+  "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png" +
+  (_stadiaKey ? `?api_key=${_stadiaKey}&v=1` : "?v=1");
+
 export interface GridStats {
   totalKm: number;
   nodeCount: number;
@@ -162,12 +179,12 @@ export default function GridMap({
         <ZoomControl position="bottomleft" />
         <LabelPaneSetup />
 
-        {/* CARTO Dark Matter (no labels) — clean dark base with readable water */}
+        {/* Stadia Maps — Alidade Smooth Dark (replaces CARTO Dark Matter).
+            Key sourced from NEXT_PUBLIC_STADIA_API_KEY (see module constant above). */}
         <TileLayer
           className="basemap-tiles"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
+          attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+          url={STADIA_TILE_URL}
           maxZoom={20}
         />
 
@@ -181,13 +198,9 @@ export default function GridMap({
           />
         )}
 
-        {/* Place labels on a high pane so they stay legible over the network */}
-        <TileLayer
-          pane="labels"
-          url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={20}
-        />
+        {/* Stadia Alidade Smooth Dark includes labels in the base tile, so no
+            separate labels layer is needed. The pane is kept registered (via
+            LabelPaneSetup) for z-ordering, but no tile fetch is made. */}
 
         <GridLayers
           data={snapped}

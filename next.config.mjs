@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 // Content-Security-Policy scoped to what the app actually loads:
-//  - CARTO basemap tiles (basemaps.cartocdn.com) as images
+//  - Stadia Maps basemap tiles (tiles.stadiamaps.com) as images
 //  - the self-hosted Manrope font (font-src 'self')
 //  - local static GeoJSON under /data (connect-src 'self')
 // script/style keep 'unsafe-inline' because Next's hydration and Leaflet inject
@@ -11,9 +11,9 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com",
+  "img-src 'self' data: blob: https://tiles.stadiamaps.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com",
+  "connect-src 'self' https://tiles.stadiamaps.com",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",

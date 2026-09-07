@@ -11,9 +11,9 @@
 export function MapStyles() {
   return (
     <style jsx global>{`
-      /* CARTO Dark Matter renders water as a distinct dark blue-grey and land a
-         touch lighter, so coastline and islands (e.g. Gorée) stay readable
-         without filter hacks. Background matches the theme's water tone. */
+      /* Stadia Alidade Smooth Dark renders water as a distinct dark blue-grey
+         and land a touch lighter, so coastline and islands (e.g. Gorée) stay
+         readable without filter hacks. Background matches the theme's water tone. */
       .leaflet-container { background: #1B2026 !important; }
       .basemap-tiles { filter: saturate(1.05); }
 

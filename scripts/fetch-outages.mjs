@@ -166,9 +166,20 @@ function isOutageArticle(title, description) {
 // Planned-maintenance detector.
 // Returns true when the article describes a scheduled/programmed cut rather
 // than an unplanned outage. Used to set planned:true and cap severity.
+//
+// Deliberately narrow — only match terms that unambiguously assert a schedule:
+//   - programm[eé] / planifi[eé]: "coupures programmées", "travaux planifiés"
+//   - calendrier de (travaux|coupures): explicit schedule reference
+//   - "scheduled" (English)
+//
+// Excluded intentionally:
+//   - "travaux" alone — appears in questions ("s'agit-il de travaux?") and
+//     unconfirmed speculation, producing false positives.
+//   - "maintenance" alone — too generic; "maintenance" in English often appears
+//     in unrelated contexts.
 // ---------------------------------------------------------------------------
 const PLANNED_SIGNALS =
-  /programm[eé]|planifi[eé]|travaux|maintenance|scheduled|coupure.*programm|calendar|calendrier/i;
+  /programm[eé]|planifi[eé]|calendrier\s+de\s+(travaux|coupures?)|coupures?\s+programm|scheduled\s+(outage|cut|maintenance)/i;
 
 function isPlanned(text) {
   return PLANNED_SIGNALS.test(text);

@@ -423,13 +423,13 @@
         "event_id": "evt-0015",
         "asset_ref": "thies-substation",
         "asset_type": "node",
-        "event_type": "maintenance",
+        "event_type": "outage",
         "start": "2026-09-19T12:22:03.000Z",
         "end": null,
         "duration_min": null,
         "cause": "Thiès : les coupures d’électricité perturbent le quotidien des habitants de Carrière",
         "severity": "low",
-        "planned": true,
+        "planned": false,
         "source": "https://www.senenews.com/actualites/thies-a-carriere-les-coupures-delectricite-bouleversent-le-quotidien-des-habitants_600251.html",
         "confidence": "reported"
       }

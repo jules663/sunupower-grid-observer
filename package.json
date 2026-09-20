@@ -11,7 +11,9 @@
     "test:watch": "vitest",
     "validate-data": "node scripts/validate-data.mjs",
     "dedupe-grid": "node scripts/dedupe-grid.mjs",
-    "add-asset-ids": "node scripts/add-asset-ids.mjs"
+    "add-asset-ids": "node scripts/add-asset-ids.mjs",
+    "fetch-outages": "node scripts/fetch-outages.mjs",
+    "fetch-outages:dry": "node scripts/fetch-outages.mjs --dry-run"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",

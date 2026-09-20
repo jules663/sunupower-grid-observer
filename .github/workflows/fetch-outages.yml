@@ -1,0 +1,46 @@
+name: Fetch outage events
+
+on:
+  schedule:
+    # Runs every 6 hours. Vercel redeploys automatically on the resulting push.
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    # Also runnable manually from the GitHub Actions tab — useful for testing
+    # or forcing a refresh outside the schedule.
+    inputs:
+      days:
+        description: "Lookback window in days (default: 7)"
+        required: false
+        default: "7"
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push the updated outage-events.json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch outage events
+        run: node scripts/fetch-outages.mjs --days=${{ inputs.days || 7 }}
+        # No secrets needed — both RSS feeds and IODA are public APIs.
+
+      - name: Commit and push if outage-events.json changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/outage-events.json
+          # Exit 0 (success) even if there is nothing new to commit.
+          git diff --cached --quiet && echo "No new events — nothing to commit." || \
+            git commit -m "chore(data): auto-update outage events [skip ci]" && git push

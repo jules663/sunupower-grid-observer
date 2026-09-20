@@ -18,6 +18,14 @@ export async function GET() {
     });
   } catch (err) {
     console.error("[/api/events/maintenance] read failed:", err);
-    return NextResponse.json({ error: "Failed to load maintenance events" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to load maintenance events" },
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
   }
 }

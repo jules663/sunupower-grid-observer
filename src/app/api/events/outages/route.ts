@@ -31,6 +31,14 @@ export async function GET() {
     });
   } catch (err) {
     console.error("[/api/events/outages] read failed:", err);
-    return NextResponse.json({ error: "Failed to load outage events" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to load outage events" },
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
   }
 }

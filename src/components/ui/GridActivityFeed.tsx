@@ -215,7 +215,7 @@ export function GridActivityFeed({
   year: number | "all";
   strings: FeedStrings;
   onFocusAsset?: (assetRef: string) => void;
-}) {
+}): JSX.Element {
   const s = strings;
   // Events and the asset-name lookup come from the shared provider — one fetch
   // serves both this panel and the map.
@@ -225,7 +225,19 @@ export function GridActivityFeed({
   const [filters, setFilters] = useState<FeedFilters>(defaultFilters());
   const [showIncidents, setShowIncidents] = useState(true);
 
-  // Keep the feed's year scope in sync with the map's time slider.
+  // Close feed drawer on Escape key press when open
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
+  // Sync year filter with prop when explicitly passed
   useEffect(() => {
     setFilters((prev) => (prev.year === year ? prev : { ...prev, year }));
   }, [year]);
@@ -260,7 +272,7 @@ export function GridActivityFeed({
   return (
     <div
       role="dialog"
-      aria-modal="false"
+      aria-modal={open ? "true" : "false"}
       aria-label={s.feedTitle}
       aria-hidden={!open}
       className={`absolute top-0 right-0 h-full z-[2500] w-full max-w-[400px] transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}

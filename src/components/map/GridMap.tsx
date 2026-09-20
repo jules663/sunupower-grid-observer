@@ -81,7 +81,7 @@ interface Props {
 
 export default function GridMap({
   lang, filter, view, onStats, focusAsset, focusNonce, confidenceFilter, onIndices,
-}: Props) {
+}: Props): JSX.Element {
   // Datasets come from the shared provider, so the map and the activity feed
   // read the same objects from a single fetch.
   const { data, border: senegalBorder, error: loadError } = useGridData();

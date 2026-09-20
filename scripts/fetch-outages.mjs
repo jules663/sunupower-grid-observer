@@ -417,9 +417,10 @@ function articleToFeature(article, existingSourceUrls) {
   // Planned cuts are operational — never escalate beyond medium.
   if (planned && (severity === "high" || severity === "critical")) severity = "medium";
 
-  const isoStart = isNaN(Date.parse(publishedAt))
+  const parsedTs = Date.parse(publishedAt);
+  const isoStart = isNaN(parsedTs)
     ? new Date().toISOString()
-    : new Date(publishedAt).toISOString();
+    : new Date(parsedTs).toISOString();
 
   return {
     feature: {

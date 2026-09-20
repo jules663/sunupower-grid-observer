@@ -385,6 +385,54 @@
         "source": "SENELEC (senelec.sn/saifisaidi)",
         "confidence": "measured"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0014",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-09-19T16:02:55.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Coupures à Dakar : Top 5 des quartiers qui seront les plus affectés, ces prochains jours",
+        "severity": "low",
+        "planned": true,
+        "source": "https://www.senenews.com/actualites/coupures-a-dakar-top-5-des-quartiers-qui-seront-les-plus-affectes-ces-prochains-jours_600230.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.45,
+          15.05
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0015",
+        "asset_ref": "thies-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-09-19T12:22:03.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Thiès : les coupures d’électricité perturbent le quotidien des habitants de Carrière",
+        "severity": "low",
+        "planned": true,
+        "source": "https://www.senenews.com/actualites/thies-a-carriere-les-coupures-delectricite-bouleversent-le-quotidien-des-habitants_600251.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

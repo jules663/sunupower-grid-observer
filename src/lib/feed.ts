@@ -116,12 +116,12 @@ function matchesFilters(e: FeedEvent, f: FeedFilters): boolean {
   return true;
 }
 
-// Maintenance-led ordering: within a section, planned maintenance sorts before
-// outage/constraint at the same time, so the maintenance schedule reads as the
-// primary content and reliability incidents as secondary context.
+// Severity-led ordering: within a section, outages sort first (active failures),
+// then constraints (persistent structural risks), then maintenance (planned work).
 function typeRank(t: EventType): number {
-  if (t === "maintenance") return 0;
-  return 1; // outage / constraint
+  if (t === "outage")     return 0;
+  if (t === "constraint") return 1;
+  return 2; // maintenance
 }
 
 // Apply filters and split into the three time sections. Sorting per section:

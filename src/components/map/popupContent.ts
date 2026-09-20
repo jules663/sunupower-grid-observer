@@ -275,7 +275,9 @@ function buildNearTermHtml(events: NearbyEvent[], s: MapStrings, nowMs: number):
   return `
     <div class="mt-3 pt-2 border-t border-white/5">
       <div class="text-[9px] uppercase tracking-widest font-bold text-sunu-graphite mb-1">${esc(s.nearTermHead)}</div>
-      ${rows}
+      <div style="max-height:220px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.15) transparent;">
+        ${rows}
+      </div>
     </div>`;
 }
 

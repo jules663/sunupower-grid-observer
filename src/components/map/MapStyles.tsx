@@ -58,8 +58,13 @@ export function MapStyles() {
       /* Popup chrome — frosted glass matching the overlay panels. */
       .custom-popup .leaflet-popup-content-wrapper { background: rgba(14, 14, 18, 0.48) !important; backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important; -webkit-backdrop-filter: blur(14px) saturate(160%) brightness(0.96) !important; color: #EDEFF7 !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.10) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07) !important; }
       .custom-popup .leaflet-popup-tip { background: rgba(14, 14, 18, 0.48) !important; backdrop-filter: blur(14px) !important; border: 1px solid rgba(255, 255, 255, 0.10) !important; box-shadow: none !important; }
-      .leaflet-popup-content { margin: 16px 20px !important; width: auto !important; min-width: 220px; max-width: 260px; }
+      .leaflet-popup-content { margin: 16px 20px !important; width: auto !important; min-width: 220px; max-width: 260px; max-height: 70vh; overflow-y: auto; }
       .custom-popup .leaflet-popup-content-wrapper { width: auto !important; max-width: 300px !important; }
+      /* Scrollbar styling for the popup content — subtle to match the dark theme. */
+      .leaflet-popup-content::-webkit-scrollbar { width: 4px; }
+      .leaflet-popup-content::-webkit-scrollbar-track { background: transparent; }
+      .leaflet-popup-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+      .leaflet-popup-content::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); }
 
       /* Line hover tooltip — same frosted language as the popups but lighter,
          so tracing a circuit never feels as heavy as clicking one. */

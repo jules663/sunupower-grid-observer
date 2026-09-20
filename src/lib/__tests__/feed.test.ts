@@ -200,15 +200,17 @@ describe("buildFeedSections", () => {
     expect(sections.past[1].props.event_id).toBe("older");
   });
 
-  it("ranks maintenance before outage/constraint at the same timestamp", () => {
+  it("ranks outage before constraint before maintenance at the same timestamp", () => {
     const coll = makeCollection([
-      { event_id: "out-1",  start: "2024-07-01T00:00:00Z", event_type: "outage" },
-      { event_id: "maint-1", start: "2024-07-01T00:00:00Z", event_type: "maintenance" },
+      { event_id: "maint-1",      start: "2024-07-01T00:00:00Z", event_type: "maintenance" },
+      { event_id: "constraint-1", start: "2024-07-01T00:00:00Z", event_type: "constraint" },
+      { event_id: "out-1",        start: "2024-07-01T00:00:00Z", event_type: "outage" },
     ]);
     const evts = buildFeedEvents(coll, null, new Map(), NOW);
     const sections = buildFeedSections(evts, defaultFilters());
-    expect(sections.ahead[0].props.event_id).toBe("maint-1");
-    expect(sections.ahead[1].props.event_id).toBe("out-1");
+    expect(sections.ahead[0].props.event_id).toBe("out-1");
+    expect(sections.ahead[1].props.event_id).toBe("constraint-1");
+    expect(sections.ahead[2].props.event_id).toBe("maint-1");
   });
 });
 

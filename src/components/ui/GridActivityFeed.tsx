@@ -12,7 +12,7 @@
 // is preserved: every card shows the confidence tier and source verbatim.
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { X, Search, CalendarClock, Radio, History, Wrench, Zap, ChevronDown } from "lucide-react";
+import { X, Search, CalendarClock, Radio, History, Wrench, Zap, AlertTriangle, ChevronDown } from "lucide-react";
 import type { EventType, EventSeverity, EventConfidence } from "@/types/grid";
 import {
   buildFeedEvents, buildFeedSections, defaultFilters,
@@ -57,6 +57,14 @@ const SEVERITY_COLOR: Record<EventSeverity, string> = {
   critical: "#EF4444",
 };
 
+// Per-type accent: outage is severity-driven (red spectrum), constraint is
+// amber (persistent structural condition), maintenance is neutral grey.
+const TYPE_BASE_COLOR: Record<EventType, string> = {
+  outage:      "#EF4444", // red — active failure
+  constraint:  "#F59E0B", // amber — structural risk
+  maintenance: "#9DA2B3", // grey — planned work
+};
+
 const CONFIDENCE_COLOR: Record<EventConfidence, string> = {
   measured: "#22C55E",
   reported: "#F59E0B",
@@ -87,12 +95,23 @@ function typeLabel(t: EventType, s: FeedStrings): string {
   return s.typeConstraint;
 }
 
-// One event card. Maintenance and incidents share the card but differ in accent:
-// maintenance uses a neutral wrench accent; incidents use the severity color.
+// Per-type icon component — each event type gets its own distinct icon.
+function TypeIcon({ t, accent }: { t: EventType; accent: string }) {
+  if (t === "outage")      return <Zap           className="w-3 h-3 shrink-0" style={{ color: accent }} aria-hidden="true" />;
+  if (t === "constraint")  return <AlertTriangle  className="w-3 h-3 shrink-0" style={{ color: accent }} aria-hidden="true" />;
+  return                          <Wrench         className="w-3 h-3 shrink-0" style={{ color: accent }} aria-hidden="true" />;
+}
+
+// One event card. Each event type has a distinct icon and accent:
+//   outage     → red Zap      (severity-driven shade)
+//   constraint → amber AlertTriangle (structural risk, fixed colour)
+//   maintenance → grey Wrench (planned work, neutral)
 function EventCard({ e, s, onFocus }: { e: FeedEvent; s: FeedStrings; onFocus?: (assetRef: string) => void }) {
   const p = e.props;
-  const isMaint = p.event_type === "maintenance";
-  const accent = isMaint ? "#9DA2B3" : SEVERITY_COLOR[p.severity];
+  // Outages: severity-driven color. Constraint + maintenance: fixed type color.
+  const accent = p.event_type === "outage"
+    ? SEVERITY_COLOR[p.severity]
+    : TYPE_BASE_COLOR[p.event_type];
   const confColor = CONFIDENCE_COLOR[p.confidence];
 
   return (
@@ -109,10 +128,8 @@ function EventCard({ e, s, onFocus }: { e: FeedEvent; s: FeedStrings; onFocus?: 
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
-            {isMaint
-              ? <Wrench className="w-3 h-3 text-sunu-space shrink-0" aria-hidden="true" />
-              : <Zap className="w-3 h-3 shrink-0" style={{ color: accent }} aria-hidden="true" />}
-            <span className="text-[10px] uppercase tracking-[0.14em] font-bold text-sunu-space truncate">
+            <TypeIcon t={p.event_type} accent={accent} />
+            <span className="text-[10px] uppercase tracking-[0.14em] font-bold truncate" style={{ color: accent }}>
               {typeLabel(p.event_type, s)}
             </span>
             {p.planned && (
@@ -149,8 +166,10 @@ function EventCard({ e, s, onFocus }: { e: FeedEvent; s: FeedStrings; onFocus?: 
 }
 
 // A time section (Ahead / Current / Past) with its icon, count, and cards.
-// Within a section, maintenance cards render first (maintenance-led), then any
-// incidents under a collapsible sub-header.
+// Within a section: outages first (active failures), then constraints (structural
+// risks), then maintenance (planned work) — severity order, most urgent first.
+// Maintenance can be collapsed via the showIncidents toggle (now re-purposed as
+// "show maintenance" since outages/constraints are always shown).
 function FeedSection({
   title, icon, events, s, showIncidents, onFocus, accent,
 }: {
@@ -162,8 +181,9 @@ function FeedSection({
   onFocus?: (assetRef: string) => void;
   accent: string;
 }) {
+  const outages     = events.filter((e) => e.props.event_type === "outage");
+  const constraints = events.filter((e) => e.props.event_type === "constraint");
   const maintenance = events.filter((e) => e.props.event_type === "maintenance");
-  const incidents = events.filter((e) => e.props.event_type !== "maintenance");
   if (events.length === 0) return null;
 
   return (
@@ -174,11 +194,12 @@ function FeedSection({
         <span className="text-[10px] font-mono text-sunu-graphite ml-auto">{events.length}</span>
       </div>
       <div className="flex flex-col gap-2">
-        {maintenance.map((e) => <EventCard key={e.props.event_id} e={e} s={s} onFocus={onFocus} />)}
-        {showIncidents && incidents.map((e) => <EventCard key={e.props.event_id} e={e} s={s} onFocus={onFocus} />)}
-        {!showIncidents && incidents.length > 0 && (
+        {outages.map((e)     => <EventCard key={e.props.event_id} e={e} s={s} onFocus={onFocus} />)}
+        {constraints.map((e) => <EventCard key={e.props.event_id} e={e} s={s} onFocus={onFocus} />)}
+        {showIncidents && maintenance.map((e) => <EventCard key={e.props.event_id} e={e} s={s} onFocus={onFocus} />)}
+        {!showIncidents && maintenance.length > 0 && (
           <div className="text-[10.5px] text-sunu-graphite/70 italic px-1 pt-0.5">
-            +{incidents.length} {s.typeOutage.toLowerCase()} / {s.typeConstraint.toLowerCase()} ({s.showIncidents.toLowerCase()})
+            +{maintenance.length} {s.typeMaintenance.toLowerCase()} ({s.showIncidents.toLowerCase()})
           </div>
         )}
       </div>
@@ -226,10 +247,10 @@ export function GridActivityFeed({
     });
   }, []);
 
-  const typeChips: { t: EventType; label: string }[] = [
-    { t: "maintenance", label: s.typeMaintenance },
-    { t: "outage", label: s.typeOutage },
-    { t: "constraint", label: s.typeConstraint },
+  const typeChips: { t: EventType; label: string; color: string }[] = [
+    { t: "outage",      label: s.typeOutage,       color: "#EF4444" },
+    { t: "constraint",  label: s.typeConstraint,   color: "#F59E0B" },
+    { t: "maintenance", label: s.typeMaintenance,  color: "#9DA2B3" },
   ];
 
   const loading = !dataLoaded;
@@ -293,24 +314,25 @@ export function GridActivityFeed({
 
           {/* Type filter chips */}
           <div className="flex items-center gap-1.5 mt-3" role="group" aria-label={s.filtersLabel}>
-            {typeChips.map(({ t, label }) => {
-              const active = filters.types.has(t);
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => toggleType(t)}
-                  aria-pressed={active}
-                  className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded border transition-all ${
-                    active
-                      ? "bg-sunu-blue/15 border-sunu-blue/40 text-sunu-blue"
-                      : "bg-white/[0.02] border-white/10 text-sunu-graphite hover:border-white/20"
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
+            {typeChips.map(({ t, label, color }) => {
+                const active = filters.types.has(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => toggleType(t)}
+                    aria-pressed={active}
+                    style={active ? { background: `${color}20`, borderColor: `${color}60`, color } : undefined}
+                    className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded border transition-all ${
+                      active
+                        ? ""
+                        : "bg-white/[0.02] border-white/10 text-sunu-graphite hover:border-white/20"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             <button
               type="button"
               onClick={() => setShowIncidents((v) => !v)}

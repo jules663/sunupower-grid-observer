@@ -457,6 +457,126 @@
         "source": "https://www.senenews.com/actualites/coupures-delectricite-voici-les-quartiers-concernes-pour-les-prochaines-heures_600432.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0017",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-22T09:34:44.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Le budget lourdement éprouvé par les voyages du chef de l’État, Bassirou Diomaye Faye",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/le-budget-lourdement-eprouve-par-les-voyages-du-chef-de-letat-bassirou-diomaye-faye_600492.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.228,
+          14.692
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0018",
+        "asset_ref": "sendou-power",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-22T08:42:59.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Woyofal : Les nouvelles précisions de la SENELEC sur les tarifs",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/woyofal-les-nouvelles-precisions-de-la-senelec-sur-les-tarifs_600474.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.45,
+          15.05
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0019",
+        "asset_ref": "thies-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-22T08:34:52.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Vandalisme : La SENELEC fait atterrir le dossier à la Division des Investigations Criminelles (DIC)",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/vandalisme-la-senelec-fait-atterrir-le-dossier-a-la-division-des-investigations-criminelles-dic_600472.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0020",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-22T08:31:23.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Alerte météo : Dakar et 15 départements placés en alerte rouge pour les prochains jours",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/meteo/alerte-meteo-dakar-et-15-departements-places-en-alerte-rouge-pour-les-prochains-jours_600471.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0021",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-22T07:00:12.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "La SENELEC annonce la date de la fin des coupures d’électricité",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/la-senelec-annonce-la-date-de-la-fin-des-coupures-delectricite_600464.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

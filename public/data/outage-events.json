@@ -577,6 +577,54 @@
         "source": "https://www.senenews.com/actualites/la-senelec-annonce-la-date-de-la-fin-des-coupures-delectricite_600464.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0022",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-22T15:42:11.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Senelec : la grosse incompréhension des citoyens face aux multiples coupures d’électricité",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/senelec-la-grosse-incomprehension-des-citoyens-face-aux-multiples-coupures-delectricite_600519.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0023",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-22T12:38:15.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "17 ans après, « Lepp mo leundeum » refait surface : le Sénégal replongé dans le noir",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/17-ans-apres-lepp-mo-leundeum-refait-surface-le-senegal-replonge-dans-le-noir_600514.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

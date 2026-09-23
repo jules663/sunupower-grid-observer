@@ -673,6 +673,30 @@
         "source": "https://www.seneweb.com/fr/news/Societe/coupures-de-courant-a-ziguinchor-vision-citoyenne-hausse-le-ton-et-exige-la-verite_n_505033.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.45,
+          15.05
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0026",
+        "asset_ref": "thies-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-23T15:53:14.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Thiès : ivre, il arrache un téléphone et sème la pagaille dans une course-poursuite à Jakarta",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.seneweb.com/fr/news/Societe/thies-ivre-il-arrache-un-telephone-et-seme-la-pagaille-dans-une-course-poursuite-a-jakarta_n_505033.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

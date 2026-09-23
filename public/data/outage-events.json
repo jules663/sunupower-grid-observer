@@ -625,6 +625,30 @@
         "source": "https://www.senenews.com/actualites/17-ans-apres-lepp-mo-leundeum-refait-surface-le-senegal-replonge-dans-le-noir_600514.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0024",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-23T10:37:31.789Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Actualité du Sénégal : l’essentiel de ce mercredi 23 septembre 2026",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/essentiel-du-jour/actualite-senegal-23-septembre-2026_600571.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

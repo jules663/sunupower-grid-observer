@@ -649,6 +649,30 @@
         "source": "https://www.senenews.com/essentiel-du-jour/actualite-senegal-23-septembre-2026_600571.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -16.25,
+          12.55
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0025",
+        "asset_ref": "ziguinchor-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-23T15:53:14.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Coupures de courant à Ziguinchor : Vision Citoyenne hausse le ton et exige la vérité",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.seneweb.com/fr/news/Societe/coupures-de-courant-a-ziguinchor-vision-citoyenne-hausse-le-ton-et-exige-la-verite_n_505033.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

@@ -697,6 +697,30 @@
         "source": "https://www.seneweb.com/fr/news/Societe/thies-ivre-il-arrache-un-telephone-et-seme-la-pagaille-dans-une-course-poursuite-a-jakarta_n_505033.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -15.65,
+          16.21
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0027",
+        "asset_ref": "saint-louis-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-23T22:25:44.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Saint-Louis : le scanner du Centre hospitalier régional temporairement à l’arrêt en raison des coupures",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.seneweb.com/fr/news/Societe/saint-louis-le-scanner-du-centre-hospitalier-regional-temporairement-a-larret-en-raison-des-coupures_n_505068.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

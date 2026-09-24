@@ -769,6 +769,30 @@
         "source": "Press: senenews.com, seneweb.com — multiple confirmed reports, Sep 2025; corroborated by SENELEC DG statement",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0028",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-24T14:31:25.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Sen’Eau annonce des coupures d’eau, Dakar et 9 autres régions concernées",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/seneau-annonce-des-coupures-deau-dakar-et-9-autres-regions-concernees_600712.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

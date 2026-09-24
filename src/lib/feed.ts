@@ -126,9 +126,9 @@ function typeRank(t: EventType): number {
 
 // Apply filters and split into the three time sections. Sorting per section:
 //   ahead   — soonest first (the next thing coming up is at the top)
-//   current — soonest-started first
+//   current — most recently started first (newest at top)
 //   past    — most recent first (reverse chronological history)
-// Maintenance-led tiebreak within equal timestamps.
+// Type-rank tiebreak within equal timestamps.
 export function buildFeedSections(
   events: FeedEvent[],
   filters: FeedFilters,
@@ -139,7 +139,7 @@ export function buildFeedSections(
     a.startMs - b.startMs || typeRank(a.props.event_type) - typeRank(b.props.event_type));
 
   const current = matched.filter((e) => e.bucket === "current").sort((a, b) =>
-    a.startMs - b.startMs || typeRank(a.props.event_type) - typeRank(b.props.event_type));
+    b.startMs - a.startMs || typeRank(a.props.event_type) - typeRank(b.props.event_type));
 
   const past = matched.filter((e) => e.bucket === "past").sort((a, b) =>
     b.startMs - a.startMs || typeRank(a.props.event_type) - typeRank(b.props.event_type));

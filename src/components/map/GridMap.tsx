@@ -189,8 +189,8 @@ export default function GridMap({
       arr.push(entry);
       m.set(p.asset_ref, arr);
     }
-    // Sort each asset's list: current first, then upcoming by start time.
-    m.forEach((arr) => arr.sort((a, b) => Date.parse(a.start) - Date.parse(b.start)));
+    // Sort each asset's list: most recent / in-progress first, then by start time descending.
+    m.forEach((arr) => arr.sort((a, b) => Date.parse(b.start) - Date.parse(a.start)));
     return m;
   }, [data.outageEvents, data.maintenanceEvents]);
 

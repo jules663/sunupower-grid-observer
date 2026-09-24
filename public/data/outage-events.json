@@ -721,6 +721,54 @@
         "source": "https://www.seneweb.com/fr/news/Societe/saint-louis-le-scanner-du-centre-hospitalier-regional-temporairement-a-larret-en-raison-des-coupures_n_505068.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.324,
+          14.734
+        ]
+      },
+      "properties": {
+        "event_id": "cst-2025-gen-deficit",
+        "asset_ref": "cap-des-biches",
+        "asset_type": "node",
+        "event_type": "constraint",
+        "start": "2025-07-01T00:00:00Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Chronic generation deficit: installed capacity insufficient vs peak demand — systemic délestage nationwide. Director General SENELEC on-record, Sep 2025.",
+        "severity": "critical",
+        "planned": false,
+        "source": "Statement: Directeur Général SENELEC, interview RFM/2STV, Sep 2025 — délestage systémique lié au déficit de capacité de production",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "cst-2025-dakar-dist",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "constraint",
+        "start": "2025-07-01T00:00:00Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Dakar distribution under chronic load-shedding rotation: up to 8–12h/day in affected quartiers. Reported Sep 2025 crisis.",
+        "severity": "critical",
+        "planned": false,
+        "source": "Press: senenews.com, seneweb.com — multiple confirmed reports, Sep 2025; corroborated by SENELEC DG statement",
+        "confidence": "reported"
+      }
     }
   ]
 }

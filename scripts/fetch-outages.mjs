@@ -492,6 +492,62 @@ async function main() {
     `${skipCounts["duplicate"]} already ingested.`
   );
 
+  // ---------------------------------------------------------------------------
+  // Density escalation — recurrence is itself the severity signal.
+  //
+  // When the same asset accumulates ≥ DENSITY_THRESHOLD new open-ended outage
+  // events in this fetch run, each of those events' severity is floored to
+  // DENSITY_FLOOR. Rationale: a press scraper cannot reliably detect "widespread"
+  // or "nationwide" from a single article headline, but the sheer volume of
+  // independent reports about the same node within a short window *is* a
+  // population-impact signal. We escalate only to "medium" (not "high") so the
+  // confidence posture stays honest — this is still inferred, not confirmed.
+  //
+  // Only applies to:
+  //   - outage events (not maintenance, not constraint)
+  //   - open-ended events (end: null) — an article with no stated end duration
+  //     is the clearest signal of an ongoing disruption
+  //   - RSS-derived features (IODA events already carry measured duration)
+  // ---------------------------------------------------------------------------
+  const DENSITY_THRESHOLD = 3;
+  const DENSITY_FLOOR = "medium";
+
+  // Count open outages per asset in this batch (RSS features only, added above).
+  const openOutageCount = new Map();
+  for (const f of newFeatures) {
+    const p = f.properties;
+    if (p.event_type !== "outage" || p.end !== null) continue;
+    openOutageCount.set(p.asset_ref, (openOutageCount.get(p.asset_ref) ?? 0) + 1);
+  }
+
+  // Also count open outages already in the existing file for the same assets
+  // so a persistent crisis across multiple fetch runs is still captured.
+  for (const f of existingFeatures) {
+    const p = f.properties;
+    if (p.event_type !== "outage" || p.end !== null) continue;
+    if (!openOutageCount.has(p.asset_ref)) continue; // only care about assets in this batch
+    openOutageCount.set(p.asset_ref, (openOutageCount.get(p.asset_ref) ?? 0) + 1);
+  }
+
+  let escalated = 0;
+  const SEVERITY_ORDER = ["low", "medium", "high", "critical"];
+  for (const f of newFeatures) {
+    const p = f.properties;
+    if (p.event_type !== "outage" || p.end !== null) continue;
+    if ((openOutageCount.get(p.asset_ref) ?? 0) < DENSITY_THRESHOLD) continue;
+    // Floor to DENSITY_FLOOR only if the current severity is below it.
+    if (SEVERITY_ORDER.indexOf(p.severity) < SEVERITY_ORDER.indexOf(DENSITY_FLOOR)) {
+      p.severity = DENSITY_FLOOR;
+      escalated++;
+    }
+  }
+  if (escalated > 0) {
+    console.log(
+      `  Density escalation: ${escalated} event(s) floored to "${DENSITY_FLOOR}" ` +
+      `(≥${DENSITY_THRESHOLD} open outages on the same asset).`
+    );
+  }
+
   console.log("\n[Source 2] Fetching IODA Internet-outage events…");
   const iodaFeatures = await fetchIodaFeatures(existingSourceUrls);
   newFeatures.push(...iodaFeatures);

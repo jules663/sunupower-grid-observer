@@ -83,6 +83,7 @@ export interface PageStrings {
   activeNow: string;
   feedUpdated: string;
   feedStale: string;
+  feedToday: string;   // label for the "today" count in the Past section header, e.g. "today"
 }
 
 const EN: PageStrings = {
@@ -160,6 +161,7 @@ const EN: PageStrings = {
   activeNow: "events in progress",
   feedUpdated: "Updated",
   feedStale: "Events may be stale — retrying…",
+  feedToday: "today",
 };
 
 const FR: PageStrings = {
@@ -237,6 +239,7 @@ const FR: PageStrings = {
   activeNow: "évènements en cours",
   feedUpdated: "Mis à jour",
   feedStale: "Données potentiellement obsolètes — nouvelle tentative…",
+  feedToday: "aujourd'hui",
 };
 
 const TRANSLATIONS: Record<Lang, PageStrings> = { EN, FR };

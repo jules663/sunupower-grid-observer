@@ -48,6 +48,7 @@ export interface FeedStrings {
   staleLabel: string;          // shown when the most recent poll failed
   lastUpdated: Date | null;    // timestamp of last successful poll
   eventsError: boolean;        // true when last poll failed
+  today: string;               // label for today's count in the Past header, e.g. "today"
 }
 
 const SEVERITY_COLOR: Record<EventSeverity, string> = {
@@ -170,8 +171,12 @@ function EventCard({ e, s, onFocus }: { e: FeedEvent; s: FeedStrings; onFocus?: 
 // risks), then maintenance (planned work) — severity order, most urgent first.
 // Maintenance can be collapsed via the showIncidents toggle (now re-purposed as
 // "show maintenance" since outages/constraints are always shown).
+//
+// `todayCount` is only meaningful for the Past section: when provided, the header
+// shows "N today / M total" so users immediately see today's activity vs. the
+// cumulative historical backlog.
 function FeedSection({
-  title, icon, events, s, showIncidents, onFocus, accent,
+  title, icon, events, s, showIncidents, onFocus, accent, todayCount,
 }: {
   title: string;
   icon: React.ReactNode;
@@ -180,6 +185,7 @@ function FeedSection({
   showIncidents: boolean;
   onFocus?: (assetRef: string) => void;
   accent: string;
+  todayCount?: number;
 }) {
   const outages     = events.filter((e) => e.props.event_type === "outage");
   const constraints = events.filter((e) => e.props.event_type === "constraint");
@@ -191,7 +197,15 @@ function FeedSection({
       <div className="flex items-center gap-2 mb-3 sticky top-0 z-10 pt-3 pb-2 -mx-5 px-5" style={{ background: "rgba(19,19,26,0.82)", backdropFilter: "blur(16px) saturate(160%)", WebkitBackdropFilter: "blur(16px) saturate(160%)" }}>
         <span style={{ color: accent }} aria-hidden="true">{icon}</span>
         <h3 className="text-[11px] uppercase tracking-[0.18em] font-bold text-sunu-cloud">{title}</h3>
-        <span className="text-[10px] font-mono text-sunu-graphite ml-auto">{events.length}</span>
+        {todayCount != null ? (
+          <span className="text-[10px] font-mono text-sunu-graphite ml-auto">
+            <span className="text-sunu-cloud font-semibold">{todayCount}</span>
+            <span className="text-sunu-graphite/60"> {s.today}</span>
+            <span className="text-sunu-graphite/40"> / {events.length}</span>
+          </span>
+        ) : (
+          <span className="text-[10px] font-mono text-sunu-graphite ml-auto">{events.length}</span>
+        )}
       </div>
       <div className="flex flex-col gap-2">
         {outages.map((e)     => <EventCard key={e.props.event_id} e={e} s={s} onFocus={onFocus} />)}
@@ -361,7 +375,7 @@ export function GridActivityFeed({
             <>
               <FeedSection title={s.ahead} icon={<CalendarClock className="w-3.5 h-3.5" />} events={sections.ahead} s={s} showIncidents={showIncidents} onFocus={onFocusAsset} accent="#2579fc" />
               <FeedSection title={s.current} icon={<Radio className="w-3.5 h-3.5" />} events={sections.current} s={s} showIncidents={showIncidents} onFocus={onFocusAsset} accent="#22C55E" />
-              <FeedSection title={s.past} icon={<History className="w-3.5 h-3.5" />} events={sections.past} s={s} showIncidents={showIncidents} onFocus={onFocusAsset} accent="#9DA2B3" />
+              <FeedSection title={s.past} icon={<History className="w-3.5 h-3.5" />} events={sections.past} s={s} showIncidents={showIncidents} onFocus={onFocusAsset} accent="#9DA2B3" todayCount={sections.pastTodayCount} />
             </>
           )}
         </div>

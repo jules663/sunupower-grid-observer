@@ -212,6 +212,31 @@ describe("buildFeedSections", () => {
     expect(sections.ahead[1].props.event_id).toBe("constraint-1");
     expect(sections.ahead[2].props.event_id).toBe("maint-1");
   });
+
+  it("pastTodayCount counts only past events that started today", () => {
+    // NOW = 2024-06-01T12:00:00Z → today is 2024-06-01
+    const coll = makeCollection([
+      // started and ended today → past + today
+      { event_id: "today-1", start: "2024-06-01T00:00:00Z", end: "2024-06-01T06:00:00Z" },
+      // started today but no end → current, not past
+      { event_id: "today-cur", start: "2024-06-01T00:00:00Z" },
+      // past but from a different day
+      { event_id: "older-1",   start: "2023-01-01T00:00:00Z", end: "2023-01-02T00:00:00Z" },
+    ]);
+    const evts = buildFeedEvents(coll, null, new Map(), NOW);
+    const sections = buildFeedSections(evts, defaultFilters(), NOW);
+    expect(sections.past.length).toBe(2);
+    expect(sections.pastTodayCount).toBe(1);
+  });
+
+  it("pastTodayCount is 0 when no past events started today", () => {
+    const coll = makeCollection([
+      { event_id: "old", start: "2023-01-01T00:00:00Z", end: "2023-01-02T00:00:00Z" },
+    ]);
+    const evts = buildFeedEvents(coll, null, new Map(), NOW);
+    const sections = buildFeedSections(evts, defaultFilters(), NOW);
+    expect(sections.pastTodayCount).toBe(0);
+  });
 });
 
 // --- summarizeActivity -------------------------------------------------------

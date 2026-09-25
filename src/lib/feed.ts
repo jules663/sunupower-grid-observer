@@ -40,6 +40,8 @@ export interface FeedSections {
   current: FeedEvent[];
   past: FeedEvent[];
   totalMatched: number;
+  /** How many past events started on today's UTC date. Used to show "N today / M total" in the Past header. */
+  pastTodayCount: number;
 }
 
 // Classify one event relative to `nowMs`.
@@ -132,6 +134,7 @@ function typeRank(t: EventType): number {
 export function buildFeedSections(
   events: FeedEvent[],
   filters: FeedFilters,
+  now: Date = new Date(),
 ): FeedSections {
   const matched = events.filter((e) => matchesFilters(e, filters));
 
@@ -144,7 +147,14 @@ export function buildFeedSections(
   const past = matched.filter((e) => e.bucket === "past").sort((a, b) =>
     b.startMs - a.startMs || typeRank(a.props.event_type) - typeRank(b.props.event_type));
 
-  return { ahead, current, past, totalMatched: matched.length };
+  // Count past events whose start date falls on today (UTC) so the panel can
+  // show "N today / M total" rather than a single ever-growing historical count.
+  const todayUtc = now.toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const pastTodayCount = past.filter((e) =>
+    new Date(e.startMs).toISOString().slice(0, 10) === todayUtc,
+  ).length;
+
+  return { ahead, current, past, totalMatched: matched.length, pastTodayCount };
 }
 
 // --- Activity badge summary ---------------------------------------------------

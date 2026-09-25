@@ -209,6 +209,7 @@ function HomeContent() {
     staleLabel: t.feedStale,
     lastUpdated,
     eventsError,
+    today: t.feedToday,
   };
 
   return (

@@ -793,6 +793,30 @@
         "source": "https://www.senenews.com/actualites/seneau-annonce-des-coupures-deau-dakar-et-9-autres-regions-concernees_600712.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0029",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-25T09:10:49.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "La Senelec met fin aux coupures d’électricité notées ces derniers jours",
+        "severity": "high",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/la-senelec-met-fin-aux-coupures-delectricite-notees-ces-derniers-jours_600802.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

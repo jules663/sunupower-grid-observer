@@ -817,6 +817,30 @@
         "source": "https://www.senenews.com/actualites/la-senelec-met-fin-aux-coupures-delectricite-notees-ces-derniers-jours_600802.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0030",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-25T11:11:46.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Après 122 nuits à Rebeuss, Mansour Faye livre sa vérité : « Je me souviens, je pardonne, mais je n’oublie pas »",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/apres-122-nuits-a-rebeuss-mansour-faye-livre-sa-verite-je-me-souviens-je-pardonne-mais-je-noublie-pas_600813.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

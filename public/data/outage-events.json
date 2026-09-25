@@ -318,7 +318,7 @@
         "event_id": "sen-2024-h1",
         "asset_ref": "hann-substation",
         "asset_type": "node",
-        "event_type": "outage",
+        "event_type": "constraint",
         "start": "2024-01-01T00:00:00Z",
         "end": "2024-06-30T23:59:00Z",
         "duration_min": 178,
@@ -345,7 +345,7 @@
         "event_id": "sen-2024-h2",
         "asset_ref": "hann-substation",
         "asset_type": "node",
-        "event_type": "outage",
+        "event_type": "constraint",
         "start": "2024-07-01T00:00:00Z",
         "end": "2024-12-31T23:59:00Z",
         "duration_min": 222,
@@ -372,7 +372,7 @@
         "event_id": "sen-2025-h1",
         "asset_ref": "hann-substation",
         "asset_type": "node",
-        "event_type": "outage",
+        "event_type": "constraint",
         "start": "2025-01-01T00:00:00Z",
         "end": "2025-06-30T23:59:00Z",
         "duration_min": 159,
@@ -463,54 +463,6 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -17.4375,
-          14.7318
-        ]
-      },
-      "properties": {
-        "event_id": "evt-0017",
-        "asset_ref": "hann-substation",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-22T09:34:44.000Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "Le budget lourdement éprouvé par les voyages du chef de l’État, Bassirou Diomaye Faye",
-        "severity": "low",
-        "planned": false,
-        "source": "https://www.senenews.com/actualites/le-budget-lourdement-eprouve-par-les-voyages-du-chef-de-letat-bassirou-diomaye-faye_600492.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -17.228,
-          14.692
-        ]
-      },
-      "properties": {
-        "event_id": "evt-0018",
-        "asset_ref": "sendou-power",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-22T08:42:59.000Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "Woyofal : Les nouvelles précisions de la SENELEC sur les tarifs",
-        "severity": "low",
-        "planned": false,
-        "source": "https://www.senenews.com/actualites/woyofal-les-nouvelles-precisions-de-la-senelec-sur-les-tarifs_600474.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
           -16.45,
           15.05
         ]
@@ -527,30 +479,6 @@
         "severity": "low",
         "planned": false,
         "source": "https://www.senenews.com/actualites/vandalisme-la-senelec-fait-atterrir-le-dossier-a-la-division-des-investigations-criminelles-dic_600472.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -17.4375,
-          14.7318
-        ]
-      },
-      "properties": {
-        "event_id": "evt-0020",
-        "asset_ref": "hann-substation",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-22T08:31:23.000Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "Alerte météo : Dakar et 15 départements placés en alerte rouge pour les prochains jours",
-        "severity": "low",
-        "planned": false,
-        "source": "https://www.senenews.com/meteo/alerte-meteo-dakar-et-15-departements-places-en-alerte-rouge-pour-les-prochains-jours_600471.html",
         "confidence": "reported"
       }
     },
@@ -607,54 +535,6 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -17.4375,
-          14.7318
-        ]
-      },
-      "properties": {
-        "event_id": "evt-0023",
-        "asset_ref": "hann-substation",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-22T12:38:15.000Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "17 ans après, « Lepp mo leundeum » refait surface : le Sénégal replongé dans le noir",
-        "severity": "low",
-        "planned": false,
-        "source": "https://www.senenews.com/actualites/17-ans-apres-lepp-mo-leundeum-refait-surface-le-senegal-replonge-dans-le-noir_600514.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -17.4375,
-          14.7318
-        ]
-      },
-      "properties": {
-        "event_id": "evt-0024",
-        "asset_ref": "hann-substation",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-23T10:37:31.789Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "Actualité du Sénégal : l’essentiel de ce mercredi 23 septembre 2026",
-        "severity": "low",
-        "planned": false,
-        "source": "https://www.senenews.com/essentiel-du-jour/actualite-senegal-23-septembre-2026_600571.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
           -16.25,
           12.55
         ]
@@ -671,30 +551,6 @@
         "severity": "low",
         "planned": false,
         "source": "https://www.seneweb.com/fr/news/Societe/coupures-de-courant-a-ziguinchor-vision-citoyenne-hausse-le-ton-et-exige-la-verite_n_505033.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -16.45,
-          15.05
-        ]
-      },
-      "properties": {
-        "event_id": "evt-0026",
-        "asset_ref": "thies-substation",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-23T15:53:14.000Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "Thiès : ivre, il arrache un téléphone et sème la pagaille dans une course-poursuite à Jakarta",
-        "severity": "low",
-        "planned": false,
-        "source": "https://www.seneweb.com/fr/news/Societe/thies-ivre-il-arrache-un-telephone-et-seme-la-pagaille-dans-une-course-poursuite-a-jakarta_n_505033.html",
         "confidence": "reported"
       }
     },
@@ -780,30 +636,6 @@
         ]
       },
       "properties": {
-        "event_id": "evt-0028",
-        "asset_ref": "hann-substation",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-24T14:31:25.000Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "Sen’Eau annonce des coupures d’eau, Dakar et 9 autres régions concernées",
-        "severity": "medium",
-        "planned": false,
-        "source": "https://www.senenews.com/actualites/seneau-annonce-des-coupures-deau-dakar-et-9-autres-regions-concernees_600712.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -17.4375,
-          14.7318
-        ]
-      },
-      "properties": {
         "event_id": "evt-0029",
         "asset_ref": "hann-substation",
         "asset_type": "node",
@@ -815,30 +647,6 @@
         "severity": "high",
         "planned": false,
         "source": "https://www.senenews.com/actualites/la-senelec-met-fin-aux-coupures-delectricite-notees-ces-derniers-jours_600802.html",
-        "confidence": "reported"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -17.4375,
-          14.7318
-        ]
-      },
-      "properties": {
-        "event_id": "evt-0030",
-        "asset_ref": "hann-substation",
-        "asset_type": "node",
-        "event_type": "outage",
-        "start": "2026-09-25T11:11:46.000Z",
-        "end": null,
-        "duration_min": null,
-        "cause": "Après 122 nuits à Rebeuss, Mansour Faye livre sa vérité : « Je me souviens, je pardonne, mais je n’oublie pas »",
-        "severity": "medium",
-        "planned": false,
-        "source": "https://www.senenews.com/actualites/apres-122-nuits-a-rebeuss-mansour-faye-livre-sa-verite-je-me-souviens-je-pardonne-mais-je-noublie-pas_600813.html",
         "confidence": "reported"
       }
     }

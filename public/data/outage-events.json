@@ -649,6 +649,30 @@
         "source": "https://www.senenews.com/actualites/la-senelec-met-fin-aux-coupures-delectricite-notees-ces-derniers-jours_600802.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.28,
+          14.72
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0030",
+        "asset_ref": "diamniadio-tech-hub",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-26T08:08:05.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Diamniadio : Senelec annonce des perturbations électriques dans la zone après des actes de vandalisme",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.rewmi.com/diamniadio-senelec-annonce-des-perturbations-electriques-dans-la-zone-apres-des-actes-de-vandalisme/",
+        "confidence": "reported"
+      }
     }
   ]
 }

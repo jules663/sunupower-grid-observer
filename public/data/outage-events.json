@@ -673,6 +673,30 @@
         "source": "https://www.rewmi.com/diamniadio-senelec-annonce-des-perturbations-electriques-dans-la-zone-apres-des-actes-de-vandalisme/",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0031",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-28T17:00:06.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Ils devaient monter à bord du Joola et l’ont raté : Les destins de ceux qui ont échappé au naufrage par hasard",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/ils-devaient-monter-a-bord-du-joola-et-lont-rate-les-destins-de-ceux-qui-ont-echappe-au-naufrage-par-hasard_601086.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

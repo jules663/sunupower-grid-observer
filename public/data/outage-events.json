@@ -697,6 +697,54 @@
         "source": "https://www.senenews.com/actualites/ils-devaient-monter-a-bord-du-joola-et-lont-rate-les-destins-de-ceux-qui-ont-echappe-au-naufrage-par-hasard_601086.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0032",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-09-30T09:57:03.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Le cri de cœur d’un député du peuple pour ceux que l’État a oubliés dans les ténèbres (Dr Samba Faye)",
+        "severity": "medium",
+        "planned": true,
+        "source": "https://www.senenews.com/actualites/contribution-chronique/le-cri-de-coeur-dun-depute-du-peuple-pour-ceux-que-letat-a-oublies-dans-les-tenebres-dr-samba-faye_601297.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0033",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-30T07:31:20.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Palais : Bassirou Diomaye Faye convoque les ministres, des décisions importantes attendues",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/palais-bassirou-diomaye-faye-convoque-les-ministres-des-decisions-importantes-attendues_601266.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

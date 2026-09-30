@@ -745,6 +745,30 @@
         "source": "https://www.senenews.com/actualites/palais-bassirou-diomaye-faye-convoque-les-ministres-des-decisions-importantes-attendues_601266.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.324,
+          14.734
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0034",
+        "asset_ref": "cap-des-biches",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-09-30T21:13:34.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Factures d’électricité impayées : Comment l’administration est en train de plomber la SENELEC",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/economie/factures-delectricite-impayees-comment-ladministration-est-en-train-de-plomber-la-senelec_601390.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

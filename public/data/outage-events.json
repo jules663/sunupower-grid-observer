@@ -817,6 +817,30 @@
         "source": "https://www.senenews.com/essentiel-du-jour/actualite-senegal-1-octobre-2026_601411.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0037",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-10-01T18:30:58.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Conseil des ministres : Les 5 annonces qui vont toucher votre portefeuille dès octobre",
+        "severity": "low",
+        "planned": true,
+        "source": "https://www.senenews.com/actualites/economie/conseil-des-ministres-les-5-annonces-qui-vont-toucher-votre-portefeuille-des-octobre_601491.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

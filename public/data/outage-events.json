@@ -769,6 +769,54 @@
         "source": "https://www.senenews.com/actualites/economie/factures-delectricite-impayees-comment-ladministration-est-en-train-de-plomber-la-senelec_601390.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0035",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-01T12:15:23.299Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Actualité du Sénégal : l’essentiel de ce jeudi 1 octobre 2026",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/essentiel-du-jour/actualite-senegal-1-octobre-2026_601413.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0036",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-01T12:15:23.299Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Actualité du Sénégal : l’essentiel de ce jeudi 1 octobre 2026",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/essentiel-du-jour/actualite-senegal-1-octobre-2026_601411.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

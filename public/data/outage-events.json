@@ -841,6 +841,54 @@
         "source": "https://www.senenews.com/actualites/economie/conseil-des-ministres-les-5-annonces-qui-vont-toucher-votre-portefeuille-des-octobre_601491.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0038",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-02T21:22:46.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Enseignement supérieur : Voici les écoles privées non reconnues par l’État, l’ISEG en tête de liste",
+        "severity": "high",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/enseignement-superieur-voici-les-ecoles-privees-non-reconnues-par-letat-liseg-en-tete-de-liste_601633.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.324,
+          14.734
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0039",
+        "asset_ref": "cap-des-biches",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-02T17:34:23.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Hydrocarbures : Le pressing de Aliko Dangote sur la Société Africaine de Raffinage du Sénégal",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/hydrocarbures-le-pressing-de-aliko-dangote-sur-la-societe-africaine-de-raffinage-du-senegal_601612.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

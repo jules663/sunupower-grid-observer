@@ -889,6 +889,30 @@
         "source": "https://www.senenews.com/actualites/hydrocarbures-le-pressing-de-aliko-dangote-sur-la-societe-africaine-de-raffinage-du-senegal_601612.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.266,
+          14.743
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0040",
+        "asset_ref": "kounoune-power-station",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-03T00:08:55.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Vols de câbles de la Senelec : ce que révèle l'enquête de la DIC, 7 suspects dont un Indien bientôt devant le procureur ",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.seneweb.com/fr/news/Societe/vols-de-cables-de-la-senelec-ce-que-revele-lenquete-de-la-dic-7-suspects-dont-un-indien-bientot-devant-le-procureur-cheikh-diakhoumpa_n_505949.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

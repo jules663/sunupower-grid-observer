@@ -913,6 +913,150 @@
         "source": "https://www.seneweb.com/fr/news/Societe/vols-de-cables-de-la-senelec-ce-que-revele-lenquete-de-la-dic-7-suspects-dont-un-indien-bientot-devant-le-procureur-cheikh-diakhoumpa_n_505949.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0041",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-03T08:17:49.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "SENELEC : Les actes de vandalisme cachaient un vrai business, les Indiens sont tombés",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/senelec-les-actes-de-vandalisme-cachaient-un-vrai-business-les-indiens-sont-tombes_601648.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0042",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-10-03T08:06:42.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "SENELEC : Des coupures du samedi au lundi, voici les zones les plus impactées",
+        "severity": "low",
+        "planned": true,
+        "source": "https://www.senenews.com/actualites/senelec-des-coupures-du-samedi-au-lundi-voici-les-zones-les-plus-impactees_601655.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0043",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-10-03T08:00:11.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "La SENELEC annonce de nouvelles coupures d’électricité dans les prochaines heures",
+        "severity": "low",
+        "planned": true,
+        "source": "https://www.senenews.com/actualites/la-senelec-annonce-de-nouvelles-coupures-delectricite-dans-les-prochaines-heures_601652.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -13.25,
+          16.15
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0044",
+        "asset_ref": "matam-hub",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-03T10:02:26.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Tournée agricole à Matam : Dr Cheikhou Oumar Bâ annonce la suppression immédiate de la prime fixe sur les factures et de",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.seneweb.com/fr/news/Politique/tournee-agricole-a-matam-dr-cheikhou-oumar-ba-annonce-la-suppression-immediate-de-la-prime-fixe-sur-les-factures-et-des-mesures-cles-pour_n_505973.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0045",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-03T09:58:41.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Coupures d’électricité : Thierno Alassane Sall charge la Senelec et dénonce un retour en arrière",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.seneweb.com/fr/news/Societe/coupures-delectricite-thierno-alassane-sall-charge-la-senelec-et-denonce-un-retour-en-arriere_n_505972.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0046",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-03T06:12:21.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Travaux au poste de Bel-Air : La Senelec annonce des perturbations sur le réseau électrique de Dakar ce week-end",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.seneweb.com/fr/news/Societe/travaux-au-poste-de-bel-air-la-senelec-annonce-des-perturbations-sur-le-reseau-electrique-de-dakar-ce-week-end_n_505957.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

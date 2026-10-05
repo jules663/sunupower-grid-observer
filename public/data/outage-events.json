@@ -1057,6 +1057,30 @@
         "source": "https://www.seneweb.com/fr/news/Societe/travaux-au-poste-de-bel-air-la-senelec-annonce-des-perturbations-sur-le-reseau-electrique-de-dakar-ce-week-end_n_505957.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0047",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "maintenance",
+        "start": "2026-10-04T21:00:29.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Mardi 6 octobre, 12h GMT : Le rendez-vous FMI – Sénégal qui peut changer vos factures",
+        "severity": "low",
+        "planned": true,
+        "source": "https://www.senenews.com/actualites/economie/mardi-6-octobre-12h-gmt-le-rendez-vous-fmi-senegal-qui-peut-changer-vos-factures_601775.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

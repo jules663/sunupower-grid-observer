@@ -1081,6 +1081,78 @@
         "source": "https://www.senenews.com/actualites/economie/mardi-6-octobre-12h-gmt-le-rendez-vous-fmi-senegal-qui-peut-changer-vos-factures_601775.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -15.85,
+          15.15
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0048",
+        "asset_ref": "dara-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-05T09:49:24.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "De nouveaux remous constatés à la SENELEC, que se passe-t-il en interne ?",
+        "severity": "low",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/de-nouveaux-remous-constates-a-la-senelec-que-se-passe-t-il-en-interne_601803.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0049",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-05T08:30:34.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Inondations : Voici les routes actuellement bloquées par les fortes pluies à Dakar",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/inondations-voici-les-routes-actuellement-bloquees-par-les-fortes-pluies-a-dakar_601791.html",
+        "confidence": "reported"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0050",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-05T07:00:09.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Inondations : Les fortes pluies font des morts à Dakar, la capitale sous les eaux",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/inondations-les-fortes-pluies-font-des-morts-a-dakar-la-capitale-sous-les-eaux_601779.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

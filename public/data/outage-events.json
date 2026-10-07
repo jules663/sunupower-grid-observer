@@ -1177,6 +1177,30 @@
         "source": "https://www.seneweb.com/fr/news/Justice/vols-de-cables-de-la-senelec-le-procureur-de-rufisque-requiert-louverture-dune-information-judiciaire-contre-les-7-suspects-dont-un-indien_n_506202.html",
         "confidence": "reported"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -17.4375,
+          14.7318
+        ]
+      },
+      "properties": {
+        "event_id": "evt-0052",
+        "asset_ref": "hann-substation",
+        "asset_type": "node",
+        "event_type": "outage",
+        "start": "2026-10-07T10:29:26.000Z",
+        "end": null,
+        "duration_min": null,
+        "cause": "Fraîchement nommé par Diomaye, Jean Baptiste Diouf plongé dans un désastre sans nom",
+        "severity": "medium",
+        "planned": false,
+        "source": "https://www.senenews.com/actualites/fraichement-nomme-par-diomaye-jean-baptiste-diouf-plonge-dans-un-desastre-sans-nom_602036.html",
+        "confidence": "reported"
+      }
     }
   ]
 }

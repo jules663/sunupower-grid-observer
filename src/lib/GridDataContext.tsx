@@ -28,7 +28,7 @@ import {
   useCallback, type ReactNode,
 } from "react";
 import type { GridData, EventCollection } from "@/types/grid";
-import { SHOW_ESI_SITES } from "@/lib/config";
+import { SHOW_ESI_SITES, RELIABILITY_CONTAINED } from "@/lib/config";
 
 // How often the client re-fetches the event files (milliseconds).
 // Matches the API route's Cache-Control max-age so polls are served from cache
@@ -185,6 +185,20 @@ function useEventPolling(): EventsState {
   }, []);
 
   useEffect(() => {
+    // G2 Strict Public Containment (fail-closed): do not poll the event API at
+    // all while contained. The reliability layer, feed, badge and popups are
+    // withheld, so the client never requests or holds event data. Mark events
+    // "loaded" with no data so the map's `loaded` gate still resolves and the
+    // infrastructure view renders normally.
+    if (RELIABILITY_CONTAINED) {
+      setOutageEvents(null);
+      setMaintenanceEvents(null);
+      setEventsError(false);
+      setLastUpdated(null);
+      setEventsLoaded(true);
+      return;
+    }
+
     const controller = new AbortController();
 
     // Immediate first fetch, then repeat.

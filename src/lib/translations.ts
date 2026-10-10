@@ -36,6 +36,7 @@ export interface PageStrings {
   mapLabel: string;
   viewInfra: string;
   viewReliability: string;
+  reliabilityUnavailable: string;
   reliabilityTitle: string;
   relScale: string;
   relLow: string;
@@ -114,6 +115,7 @@ const EN: PageStrings = {
   mapLabel: "Senegal electricity transmission network map",
   viewInfra: "Infrastructure",
   viewReliability: "Reliability",
+  reliabilityUnavailable: "Reliability intelligence temporarily unavailable pending evidence qualification.",
   reliabilityTitle: "Reliability Index",
   relScale: "Stress Score",
   relLow: "Low",
@@ -192,6 +194,7 @@ const FR: PageStrings = {
   mapLabel: "Carte du réseau de transport d'électricité du Sénégal",
   viewInfra: "Infrastructure",
   viewReliability: "Fiabilité",
+  reliabilityUnavailable: "Les informations sur la fiabilité du réseau sont temporairement indisponibles, dans l’attente de la qualification des données et des sources.",
   reliabilityTitle: "Indice de Fiabilité",
   relScale: "Score de Stress",
   relLow: "Faible",

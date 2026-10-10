@@ -38,6 +38,17 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  // Event data lives in /event-data (outside /public, so it is not statically
+  // served). Bundle it into the serverless function for the event API routes so
+  // the API can read it at runtime once containment is lifted. While contained,
+  // the routes fail-closed before reading, so this has no runtime effect now.
+  // Next 14 nests this under `experimental`.
+  experimental: {
+    outputFileTracingIncludes: {
+      "/api/events/outages": ["./event-data/**"],
+      "/api/events/maintenance": ["./event-data/**"],
+    },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

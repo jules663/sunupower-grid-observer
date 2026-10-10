@@ -18,6 +18,7 @@
 
 import { useEffect, useRef } from "react";
 import type { GridFilter, ViewMode, Lang } from "@/types/grid";
+import { RELIABILITY_CONTAINED } from "@/lib/config";
 
 export interface UrlState {
   lang: Lang;
@@ -26,7 +27,11 @@ export interface UrlState {
 }
 
 const VALID_FILTERS: GridFilter[] = ["ALL", "225", "90", "MV"];
-const VALID_VIEWS: ViewMode[] = ["infrastructure", "reliability"];
+// While contained, "reliability" is not an accepted URL view, so a hand-edited
+// ?view=reliability link is ignored and resolves to the default (infrastructure).
+const VALID_VIEWS: ViewMode[] = RELIABILITY_CONTAINED
+  ? ["infrastructure"]
+  : ["infrastructure", "reliability"];
 const VALID_LANGS: Lang[] = ["EN", "FR"];
 
 // Parse the query string, ignoring anything unrecognized. An unknown or

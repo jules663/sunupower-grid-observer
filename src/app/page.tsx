@@ -14,7 +14,8 @@ import { GridDataProvider, useGridData } from "@/lib/GridDataContext";
 import { useUrlState, type UrlState } from "@/lib/useUrlState";
 import { summarizeActivity } from "@/lib/feed";
 import { getTranslations } from "@/lib/translations";
-import { POLL_INTERVAL_MS } from "@/lib/GridDataContext";
+import { RELIABILITY_CONTAINED } from "@/lib/config";
+import { resolvePublicView } from "@/lib/containment";
 
 const GridMap = dynamic(() => import("@/components/map/GridMap"), {
   ssr: false,
@@ -27,7 +28,13 @@ import type { GridFilter, ViewMode } from "@/types/grid";
 
 // Defaults, also used to keep the URL clean (a value equal to its default is
 // omitted from the query string).
-const URL_DEFAULTS: UrlState = { lang: "EN", filter: "ALL", view: "reliability" };
+const URL_DEFAULTS: UrlState = {
+  lang: "EN",
+  filter: "ALL",
+  // G2 containment: default to the infrastructure view while reliability is
+  // withheld, so the public landing view and clean URLs reflect what is served.
+  view: RELIABILITY_CONTAINED ? "infrastructure" : "reliability",
+};
 
 // Severity → badge color, matching the feed's own severity palette.
 const BADGE_COLOR: Record<EventSeverity, string> = {
@@ -88,6 +95,21 @@ function ActivityBadge({ count, severity }: { count: number; severity: EventSeve
   );
 }
 
+// Neutral public notice shown in place of the reliability controls while the
+// reliability layer is contained. States unavailability without implying any
+// verified grid condition (G2 Strict Public Containment).
+function ContainmentNotice({ label }: { label: string }) {
+  return (
+    <div
+      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 max-w-[18rem]"
+      role="status"
+    >
+      <Info className="w-3.5 h-3.5 text-sunu-space shrink-0" aria-hidden="true" />
+      <span className="text-[11px] text-sunu-space leading-snug">{label}</span>
+    </div>
+  );
+}
+
 // The provider wraps the page so GridMap and GridActivityFeed share one fetch of
 // the static datasets instead of each running their own waterfall.
 export default function Home() {
@@ -102,6 +124,12 @@ function HomeContent() {
   const [lang, setLang] = useState<"EN" | "FR">(URL_DEFAULTS.lang);
   const [filter, setFilter] = useState<GridFilter>(URL_DEFAULTS.filter);
   const [view, setView] = useState<ViewMode>(URL_DEFAULTS.view);
+
+  // G2 Strict Public Containment. `effectiveView` is what actually renders:
+  // while contained it is always "infrastructure", regardless of state or a
+  // hand-edited URL, so no reliability surface can be reached.
+  const contained = RELIABILITY_CONTAINED;
+  const effectiveView = resolvePublicView(view);
 
   // Persist view/filter/lang in the query string so a refresh keeps the current
   // view and a shared link opens the same one.
@@ -256,21 +284,23 @@ function HomeContent() {
             Activity + a minimalist EN/FR text toggle. View toggle lives in the
             strip below. */}
         <div className="md:hidden flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setFeedOpen((v) => !v)}
-            aria-expanded={feedOpen}
-            aria-label={activity.count > 0 ? `${t.feedTitle} — ${activity.count} ${t.activeNow}` : t.feedTitle}
-            className={`relative flex items-center justify-center w-10 h-10 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
-              feedOpen
-                ? "bg-sunu-blue/15 border-sunu-blue/50 text-sunu-blue"
-                : "bg-white/[0.03] border-white/10 text-sunu-cloud hover:border-sunu-blue"
-            }`}
-          >
-            <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
-            <LivePulse lastUpdated={lastUpdated} eventsError={eventsError} />
-            <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
-          </button>
+          {!contained && (
+            <button
+              type="button"
+              onClick={() => setFeedOpen((v) => !v)}
+              aria-expanded={feedOpen}
+              aria-label={activity.count > 0 ? `${t.feedTitle} — ${activity.count} ${t.activeNow}` : t.feedTitle}
+              className={`relative flex items-center justify-center w-10 h-10 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
+                feedOpen
+                  ? "bg-sunu-blue/15 border-sunu-blue/50 text-sunu-blue"
+                  : "bg-white/[0.03] border-white/10 text-sunu-cloud hover:border-sunu-blue"
+              }`}
+            >
+              <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
+              <LivePulse lastUpdated={lastUpdated} eventsError={eventsError} />
+              <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setLang(lang === "EN" ? "FR" : "EN")}
@@ -287,23 +317,29 @@ function HomeContent() {
             Centered on md+; on small screens it falls back to flowing next to
             the logo (the mobile view toggle lives in the strip below). */}
         <div className="hidden md:flex items-center gap-5 absolute left-1/2 -translate-x-1/2">
-          <ViewToggle t={t} view={view} setView={setView} />
-          <button
-            type="button"
-            onClick={() => setFeedOpen((v) => !v)}
-            aria-expanded={feedOpen}
-            aria-label={activity.count > 0 ? `${t.feedTitle} — ${activity.count} ${t.activeNow}` : t.feedTitle}
-            className={`relative flex items-center gap-2 px-4 py-2 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
-              feedOpen
-                ? "bg-sunu-blue/15 border-sunu-blue/50 text-sunu-blue"
-                : "bg-white/[0.03] border-white/10 text-sunu-cloud hover:border-sunu-blue hover:bg-white/[0.08]"
-            }`}
-          >
-            <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
-            <span className="text-[11px] font-bold uppercase tracking-wider">{t.activityBtn}</span>
-            <LivePulse lastUpdated={lastUpdated} eventsError={eventsError} />
-            <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
-          </button>
+          {contained ? (
+            <ContainmentNotice label={t.reliabilityUnavailable} />
+          ) : (
+            <>
+              <ViewToggle t={t} view={view} setView={setView} />
+              <button
+                type="button"
+                onClick={() => setFeedOpen((v) => !v)}
+                aria-expanded={feedOpen}
+                aria-label={activity.count > 0 ? `${t.feedTitle} — ${activity.count} ${t.activeNow}` : t.feedTitle}
+                className={`relative flex items-center gap-2 px-4 py-2 rounded border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sunu-blue/70 ${
+                  feedOpen
+                    ? "bg-sunu-blue/15 border-sunu-blue/50 text-sunu-blue"
+                    : "bg-white/[0.03] border-white/10 text-sunu-cloud hover:border-sunu-blue hover:bg-white/[0.08]"
+                }`}
+              >
+                <CalendarClock className="w-4 h-4 text-sunu-blue" aria-hidden="true" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">{t.activityBtn}</span>
+                <LivePulse lastUpdated={lastUpdated} eventsError={eventsError} />
+                <ActivityBadge count={activity.count} severity={activity.worstSeverity} />
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setLang(lang === "EN" ? "FR" : "EN")}
@@ -335,7 +371,9 @@ function HomeContent() {
           toggle at md+). The voltage filter now lives in the interactive legend
           (Infrastructure view), so it is no longer in the header or this strip. */}
       <div className="md:hidden shrink-0 flex justify-center px-6 py-3 border-b border-white/[0.08]" style={{background: 'rgba(14,14,18,0.55)', backdropFilter: 'blur(16px) saturate(160%)', WebkitBackdropFilter: 'blur(16px) saturate(160%)'}}>
-        <ViewToggle t={t} view={view} setView={setView} />
+        {contained
+          ? <ContainmentNotice label={t.reliabilityUnavailable} />
+          : <ViewToggle t={t} view={view} setView={setView} />}
       </div>
 
       {/* Main Map Content */}
@@ -343,7 +381,7 @@ function HomeContent() {
         <GridMap
           lang={lang}
           filter={filter}
-          view={view}
+          view={effectiveView}
           onStats={handleStats}
           focusAsset={focusAsset}
           focusNonce={focusNonce}
@@ -353,14 +391,17 @@ function HomeContent() {
 
         {/* Grid Activity Feed — toggleable right panel (maintenance-led, all sizes).
             year="all" by design: the feed's time axis is Ahead/Current/Past, not
-            the map's calendar-year slider. */}
-        <GridActivityFeed
-          open={feedOpen}
-          onClose={() => setFeedOpen(false)}
-          year="all"
-          strings={feedStrings}
-          onFocusAsset={handleFocusAsset}
-        />
+            the map's calendar-year slider. Withheld entirely under G2 containment:
+            it surfaces unreviewed RSS-classified events, so it is not rendered. */}
+        {!contained && (
+          <GridActivityFeed
+            open={feedOpen}
+            onClose={() => setFeedOpen(false)}
+            year="all"
+            strings={feedStrings}
+            onFocusAsset={handleFocusAsset}
+          />
+        )}
 
         {/* Meta Stats Panel — desktop only. Reliability view adds the measured
             SAIFI/SAIDI indicator below the regional context. Both sections share
@@ -370,7 +411,7 @@ function HomeContent() {
             <div className="p-7">
               <ContextPanel t={t} kmDisplay={kmDisplay} nodeDisplay={nodeDisplay} loading={loading} />
             </div>
-            {view === "reliability" && (
+            {effectiveView === "reliability" && (
               <div className="border-t border-white/[0.06] p-7">
                 <MeasuredIndicesPanel t={t} series={indexSeries} />
               </div>
@@ -380,7 +421,7 @@ function HomeContent() {
 
         {/* Legend Overlay — desktop only */}
         <div className="hidden lg:block absolute bottom-12 right-8 z-[2000] p-6 glass-panel rounded-xl text-left pointer-events-auto w-[280px]">
-          {view === "reliability"
+          {effectiveView === "reliability"
             ? <ReliabilityLegend t={t} confidenceFilter={confidenceFilter} onToggleConfidence={handleToggleConfidence} />
             : <Legend t={t} filter={filter} setFilter={setFilter} />}
         </div>
@@ -427,7 +468,7 @@ function HomeContent() {
               {mobilePanel === "context" ? (
                 <div className="px-7 pb-8 space-y-7">
                   <ContextPanel t={t} kmDisplay={kmDisplay} nodeDisplay={nodeDisplay} loading={loading} />
-                  {view === "reliability" && (
+                  {effectiveView === "reliability" && (
                     <div className="border-t border-white/10 pt-6">
                       <MeasuredIndicesPanel t={t} series={indexSeries} />
                     </div>
@@ -435,7 +476,7 @@ function HomeContent() {
                 </div>
               ) : (
                 <div className="px-6 pb-8">
-                  {view === "reliability"
+                  {effectiveView === "reliability"
                     ? <ReliabilityLegend t={t} confidenceFilter={confidenceFilter} onToggleConfidence={handleToggleConfidence} />
                     : <Legend t={t} filter={filter} setFilter={setFilter} />}
                 </div>

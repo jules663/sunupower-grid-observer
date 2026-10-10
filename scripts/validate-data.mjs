@@ -9,6 +9,9 @@ import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "public", "data");
+// Event files live in /event-data (outside /public) so they are not statically
+// served. See src/lib/eventStore.ts and the G2 containment note in config.ts.
+const EVENT_DIR = join(__dirname, "..", "event-data");
 
 // Senegal + immediate region bounding box [lon, lat].
 const BBOX = { lonMin: -17.7, lonMax: -10.5, latMin: 11.5, latMax: 17.0 };
@@ -37,6 +40,16 @@ const warn = (m) => { console.warn(`  ⚠ ${m}`); warnings++; };
 function load(file) {
   try {
     return JSON.parse(readFileSync(join(DATA_DIR, file), "utf8"));
+  } catch (e) {
+    err(`${file}: not readable / invalid JSON (${e.message})`);
+    return null;
+  }
+}
+
+// Event files are read from /event-data rather than /public/data.
+function loadEvent(file) {
+  try {
+    return JSON.parse(readFileSync(join(EVENT_DIR, file), "utf8"));
   } catch (e) {
     err(`${file}: not readable / invalid JSON (${e.message})`);
     return null;
@@ -187,7 +200,7 @@ function checkEvents(file, fc) {
   });
 }
 
-for (const file of EVENT_FILES) checkEvents(file, load(file));
+for (const file of EVENT_FILES) checkEvents(file, loadEvent(file));
 
 console.log(`\n${errors === 0 ? "✓" : "✗"} Done — ${errors} error(s), ${warnings} warning(s).`);
 process.exit(errors > 0 ? 1 : 0);

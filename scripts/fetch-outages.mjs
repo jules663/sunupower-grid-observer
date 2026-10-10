@@ -44,7 +44,10 @@ import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
-const OUTAGE_FILE = join(ROOT, "public", "data", "outage-events.json");
+// Non-public location: event data lives in /event-data (outside /public) so it
+// is never statically served. The API route serves it (subject to the G2
+// containment guard). See src/lib/eventStore.ts and src/lib/config.ts.
+const OUTAGE_FILE = join(ROOT, "event-data", "outage-events.json");
 
 // ---------------------------------------------------------------------------
 // CLI flags

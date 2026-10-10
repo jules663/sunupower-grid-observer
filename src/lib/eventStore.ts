@@ -1,7 +1,10 @@
 // Event data store — server-side only (Node.js).
 //
 // This module is the single seam between the API routes and the event data
-// source. Currently it reads the static GeoJSON files from /public/data.
+// source. It reads the event GeoJSON files from /event-data — a non-public
+// directory at the project root, deliberately OUTSIDE /public so the files are
+// not statically served (there is no /data/*-events.json route). The API route
+// in front of them applies the G2 containment guard before any read.
 // To connect a live source (Supabase, a scraper, a Google Sheet export, etc.)
 // replace readEventFile() here — the API routes and the frontend never change.
 //
@@ -12,7 +15,8 @@ import { readFile } from "fs/promises";
 import path from "path";
 
 // Resolve relative to the project root, not the module's location.
-const DATA_DIR = path.join(process.cwd(), "public", "data");
+// Non-public: next.config.mjs outputFileTracingIncludes bundles this for routes.
+const DATA_DIR = path.join(process.cwd(), "event-data");
 
 /**
  * Read a GeoJSON event file from public/data and parse it.

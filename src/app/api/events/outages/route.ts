@@ -16,10 +16,22 @@
 
 import { NextResponse } from "next/server";
 import { readEventFile } from "@/lib/eventStore";
+import { containmentGuard } from "@/lib/containment";
 
 export const dynamic = "force-dynamic"; // never pre-render; always run at request time
 
 export async function GET() {
+  // G2 Strict Public Containment (fail-closed): while reliability is contained,
+  // withhold the event data entirely — do not read or serve the file. This
+  // closes the public API as a delivery path for unqualified RSS classifications.
+  const g = containmentGuard();
+  if (g) {
+    return NextResponse.json(g.body, {
+      status: g.status,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
   try {
     const data = await readEventFile("outage-events.json");
     return NextResponse.json(data, {

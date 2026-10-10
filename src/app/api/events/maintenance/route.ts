@@ -5,10 +5,20 @@
 
 import { NextResponse } from "next/server";
 import { readEventFile } from "@/lib/eventStore";
+import { containmentGuard } from "@/lib/containment";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // G2 Strict Public Containment (fail-closed) — see /api/events/outages.
+  const g = containmentGuard();
+  if (g) {
+    return NextResponse.json(g.body, {
+      status: g.status,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
   try {
     const data = await readEventFile("maintenance-events.json");
     return NextResponse.json(data, {
